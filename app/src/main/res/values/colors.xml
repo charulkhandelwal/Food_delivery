@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name ="lightpink">#FF5963</color>
+    <color name="lightwhite">#FFF7EC</color>
+    <color name="pink_gradient_start">#FFBDC6</color>
+    <color name="pink_gradient_end">#ffcfd8</color>
+    <color name="green">#7EB181</color>
+    <color name="light_grey">#999</color>
+    <color name="dark_grey">#57585A</color>
+    <color name="light_yellow">#FFAF70</color>
+</resources>

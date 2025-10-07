@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bank Account Details"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingBottom="16dp" />
+
+            <!-- Account Holder Name -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Account Holder Name"
+                android:textSize="14sp"
+                android:paddingTop="8dp" />
+
+            <EditText
+                android:id="@+id/etAccountHolderName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter account holder name"
+                android:background="@android:drawable/edit_text"
+                android:padding="10dp"
+                android:inputType="textPersonName" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Account Number"
+                android:textSize="14sp"
+                android:paddingTop="12dp" />
+
+            <EditText
+                android:id="@+id/etAccountNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter account number"
+                android:background="@android:drawable/edit_text"
+                android:padding="10dp"
+                android:inputType="number" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="IFSC Code"
+                android:textSize="14sp"
+                android:paddingTop="12dp" />
+
+            <EditText
+                android:id="@+id/etIfscCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter IFSC code"
+                android:background="@android:drawable/edit_text"
+                android:padding="10dp"
+                android:inputType="textCapCharacters" />
+
+
+
+
+
+            <Button
+                android:id="@+id/btnSubmitBankDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save Bank Details"
+                android:backgroundTint="#FF6F61"
+                android:textColor="#FFFFFF"
+                android:layout_marginTop="20dp" />
+        </LinearLayout>
+    </ScrollView>
+</layout>
