@@ -229,7 +229,7 @@ public class Document_Activity extends AppCompatActivity {
         }
 
         binding.completedPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.VISIBLE : View.GONE);
-        binding.pendingPersonal.setVisibility(View.VISIBLE);
+        binding.pendingPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.GONE : View.VISIBLE);
 
         binding.completedVehicle.setVisibility(vehicleUploaded ? View.VISIBLE : View.GONE);
         binding.pendingVehicle.setVisibility(vehicleUploaded ? View.GONE : View.VISIBLE);
