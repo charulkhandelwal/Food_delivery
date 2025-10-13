@@ -48,7 +48,7 @@ public class BankAccount_Activity extends AppCompatActivity {
         editor.putString("ifscCode", ifscCode);
         editor.apply();
 
-        // ✅ Add Bank document to DocumentPrefs
+
         ArrayList<DocumentModel> docList = DocumentPrefs.getDocumentList(this);
         boolean bankAdded = false;
         for (DocumentModel doc : docList) {
@@ -64,7 +64,7 @@ public class BankAccount_Activity extends AppCompatActivity {
 
         Toast.makeText(this, "Bank details saved!", Toast.LENGTH_SHORT).show();
 
-        // Finish activity and return RESULT_OK to Document_Activity
+
         setResult(Activity.RESULT_OK);
         finish();
     }

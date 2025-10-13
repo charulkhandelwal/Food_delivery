@@ -55,19 +55,19 @@ public interface OtpApi {
             @Part MultipartBody.Part aadhaarFront,
             @Part MultipartBody.Part aadhaarBack,
 
-            // PAN
+
             @Part MultipartBody.Part panFront,
             @Part MultipartBody.Part panBack,
 
-            // Driving Licence
+
             @Part MultipartBody.Part drivingLicenseFront,
             @Part MultipartBody.Part drivingLicenseBack,
 
-            // RC (Vehicle)
+
             @Part MultipartBody.Part rcFront,
             @Part MultipartBody.Part rcBack,
 
-            // Bank Details (text fields)
+
             @Part("accountNumber") RequestBody accountNumber,
             @Part("ifscCode") RequestBody ifscCode,
             @Part("name") RequestBody name

@@ -15,6 +15,7 @@ public class DocumentPrefs {
     private static final String PREF_NAME = "DocsPrefs";
     private static final String KEY_DOC_LIST = "document_list";
     private static final String KEY_TOKEN = "token"; // 🔥 Token key
+    private static final String KEY_PARTNER_ID = "partner_id";
 
     // ----------- Documents List Save / Get -------------
     public static void saveDocumentList(Context context, ArrayList<DocumentModel> list) {
@@ -54,4 +55,29 @@ public class DocumentPrefs {
         editor.remove(KEY_TOKEN);
         editor.apply();
     }
+
+
+
+
+   // private static final String KEY_PARTNER_ID = "partner_id";  // 🔥 Add this key
+
+    public static void savePartnerId(Context context, String partnerId) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_PARTNER_ID, partnerId);
+        editor.apply();
+    }
+
+    public static String getPartnerId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(KEY_PARTNER_ID, null);
+    }
+
+    public static void clearPartnerId(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(KEY_PARTNER_ID);
+        editor.apply();
+    }
+
 }

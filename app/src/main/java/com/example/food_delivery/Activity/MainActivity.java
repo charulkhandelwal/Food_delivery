@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         btnOrders = findViewById(R.id.btnOrders);
         btnAccount = findViewById(R.id.btnAccount);
 
-        // By default OrdersFragment load hoga
+
         loadFragment(new Order());
         highlightSelected(btnOrders, btnAccount);
 
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    // Button highlight (selected red, dusra normal)
+
     private void highlightSelected(Button selected, Button unselected) {
         selected.setBackgroundResource(R.drawable.bottom_selected);
         selected.setTextColor(getResources().getColor(android.R.color.white));

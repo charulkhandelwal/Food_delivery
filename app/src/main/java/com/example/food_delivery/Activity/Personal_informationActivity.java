@@ -7,8 +7,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
@@ -24,11 +25,15 @@ import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityPersonalInformationBinding;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -43,6 +48,7 @@ public class Personal_informationActivity extends AppCompatActivity {
     private static final int GALLERY_REQUEST = 1002;
 
     private Bitmap selectedProfileImage = null;
+    private JSONArray citiesArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +60,36 @@ public class Personal_informationActivity extends AppCompatActivity {
         binding.btnUpload.setOnClickListener(v -> showImagePicker());
         binding.btnSubmit.setOnClickListener(v -> submitProfileMultipart());
 
+        loadCitiesData(); // Load cities from JSON
     }
 
+
+    private void loadCitiesData() {
+        try {
+            InputStream is = getAssets().open("cities.json"); // Make sure cities.json exists in assets
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String json = new String(buffer, StandardCharsets.UTF_8);
+            citiesArray = new JSONArray(json);
+
+            ArrayList<String> cityList = new ArrayList<>();
+            for (int i = 0; i < citiesArray.length(); i++) {
+                cityList.add(citiesArray.getString(i));
+            }
+
+            ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_dropdown_item, cityList);
+            binding.spinnerCity.setAdapter(cityAdapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to load cities", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ------------------- PROFILE DATA METHODS -------------------
     private void populateProfileData(ProfileModel profile) {
         if (profile != null && profile.results != null) {
             binding.etFirstName.setText(profile.results.firstName);
@@ -63,14 +97,20 @@ public class Personal_informationActivity extends AppCompatActivity {
             binding.etDob.setText(profile.results.dob);
             binding.etPrimaryMobile.setText(profile.results.mobile);
             binding.etBloodGroup.setText(profile.results.bloodGroup);
-            binding.etCity.setText(profile.results.city);
             binding.etAddress.setText(profile.results.address);
             binding.etFatherName.setText(profile.results.fatherName);
             binding.etSecondaryMobile.setText(profile.results.secondaryMobile);
+
+            // Set city if available
+            if (profile.results.city != null) {
+                ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCity.getAdapter();
+                int cityPos = adapter.getPosition(profile.results.city);
+                binding.spinnerCity.setSelection(cityPos);
+            }
         }
     }
+
     private void submitProfileMultipart() {
-        // Collect form data
         String firstNameStr = binding.etFirstName.getText().toString().trim();
         String lastNameStr = binding.etLastName.getText().toString().trim();
         String fatherNameStr = binding.etFatherName.getText().toString().trim();
@@ -78,57 +118,19 @@ public class Personal_informationActivity extends AppCompatActivity {
         String primaryMobileStr = binding.etPrimaryMobile.getText().toString().trim();
         String secondaryMobileStr = binding.etSecondaryMobile.getText().toString().trim();
         String bloodGroupStr = binding.etBloodGroup.getText().toString().trim();
-        String cityStr = binding.etCity.getText().toString().trim();
+        String cityStr = binding.spinnerCity.getSelectedItem().toString().trim();
         String addressStr = binding.etAddress.getText().toString().trim();
         String languagesStr = "hindi,english"; // static for now
 
-
-        if (firstNameStr.isEmpty()) {
-            binding.etFirstName.setError("First name required");
-            binding.etFirstName.requestFocus();
-            return;
-        }
-        if (lastNameStr.isEmpty()) {
-            binding.etLastName.setError("Last name required");
-            binding.etLastName.requestFocus();
-            return;
-        }
-        if (fatherNameStr.isEmpty()) {
-            binding.etFatherName.setError("Father name required");
-            binding.etFatherName.requestFocus();
-            return;
-        }
-        if (dobStr.isEmpty()) {
-            binding.etDob.setError("DOB required");
-            binding.etDob.requestFocus();
-            return;
-        }
-        if (primaryMobileStr.isEmpty()) {
-            binding.etPrimaryMobile.setError("Primary mobile required");
-            binding.etPrimaryMobile.requestFocus();
-            return;
-        }
-        if (bloodGroupStr.isEmpty()) {
-            binding.etBloodGroup.setError("Blood group required");
-            binding.etBloodGroup.requestFocus();
-            return;
-        }
-        if (cityStr.isEmpty()) {
-            binding.etCity.setError("City required");
-            binding.etCity.requestFocus();
-            return;
-        }
-        if (addressStr.isEmpty()) {
-            binding.etAddress.setError("Address required");
-            binding.etAddress.requestFocus();
-            return;
-        }
-
-        if (selectedProfileImage == null) {
-            Toast.makeText(this, "Profile image required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        if (firstNameStr.isEmpty()) { binding.etFirstName.setError("First name required"); binding.etFirstName.requestFocus(); return; }
+        if (lastNameStr.isEmpty()) { binding.etLastName.setError("Last name required"); binding.etLastName.requestFocus(); return; }
+        if (fatherNameStr.isEmpty()) { binding.etFatherName.setError("Father name required"); binding.etFatherName.requestFocus(); return; }
+        if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); binding.etDob.requestFocus(); return; }
+        if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); binding.etPrimaryMobile.requestFocus(); return; }
+        if (bloodGroupStr.isEmpty()) { binding.etBloodGroup.setError("Blood group required"); binding.etBloodGroup.requestFocus(); return; }
+        if (cityStr.isEmpty()) { Toast.makeText(this, "Please select a city", Toast.LENGTH_SHORT).show(); return; }
+        if (addressStr.isEmpty()) { binding.etAddress.setError("Address required"); binding.etAddress.requestFocus(); return; }
+        if (selectedProfileImage == null) { Toast.makeText(this, "Profile image required", Toast.LENGTH_SHORT).show(); return; }
 
         Log.d("PROFILE_DEBUG", "firstName: " + firstNameStr);
         Log.d("PROFILE_DEBUG", "lastName: " + lastNameStr);
@@ -140,7 +142,6 @@ public class Personal_informationActivity extends AppCompatActivity {
         Log.d("PROFILE_DEBUG", "city: " + cityStr);
         Log.d("PROFILE_DEBUG", "address: " + addressStr);
         Log.d("PROFILE_DEBUG", "languages: " + languagesStr);
-
 
         RequestBody firstName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), firstNameStr);
         RequestBody lastName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), lastNameStr);
@@ -158,17 +159,14 @@ public class Personal_informationActivity extends AppCompatActivity {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             selectedProfileImage.compress(Bitmap.CompressFormat.JPEG, 80, baos);
             byte[] imageBytes = baos.toByteArray();
-
             RequestBody requestFile = RequestBody.create(okhttp3.MediaType.parse("image/*"), imageBytes);
             profile = MultipartBody.Part.createFormData("profile", "profile.jpg", requestFile);
-
             Log.d("PROFILE_DEBUG", "Profile image attached, size: " + imageBytes.length + " bytes");
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to prepare image", Toast.LENGTH_SHORT).show();
             return;
         }
-
 
         OtpApi api = ApiClient.getClientWithToken(DocumentPrefs.getToken(this)).create(OtpApi.class);
         Call<ProfileModel> call = api.updateProfile(
@@ -182,10 +180,7 @@ public class Personal_informationActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("PROFILE_DEBUG", "API Success: " + new Gson().toJson(response.body()));
                     Toast.makeText(Personal_informationActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-
-                    // ✅ Next Screen
-                    Intent intent = new Intent(Personal_informationActivity.this, Document_Activity.class);
-                    startActivity(intent);
+                    startActivity(new Intent(Personal_informationActivity.this, Document_Activity.class));
                     finish();
                 } else {
                     Log.e("PROFILE_DEBUG", "API Error: Code " + response.code());
@@ -201,81 +196,16 @@ public class Personal_informationActivity extends AppCompatActivity {
         });
     }
 
-
-
-    /*  private void submitProfile() {
-        String firstName = binding.etFirstName.getText().toString().trim();
-        String lastName = binding.etLastName.getText().toString().trim();
-        String dob = binding.etDob.getText().toString().trim();
-        String mobile = binding.etPrimaryMobile.getText().toString().trim();
-        String bloodGroup = binding.etBloodGroup.getText().toString().trim();
-        String city = binding.etCity.getText().toString().trim();
-        String address = binding.etAddress.getText().toString().trim();
-        String fatherName = binding.etFatherName.getText().toString().trim();
-        String secondaryMobile = binding.etSecondaryMobile.getText().toString().trim();
-
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Map<String, String> body = new HashMap<>();
-        body.put("firstName", firstName);
-        body.put("lastName", lastName);
-        body.put("dob", dob);
-        body.put("mobile", mobile);
-        body.put("bloodGroup", bloodGroup);
-        body.put("city", city);
-        body.put("address", address);
-        body.put("fatherName", fatherName);
-        body.put("secondaryMobile", secondaryMobile);
-
-
-        if (selectedProfileImage != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            selectedProfileImage.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-            byte[] imageBytes = baos.toByteArray();
-            String encodedImage = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
-            body.put("profile", encodedImage); // backend field = "profile"
-        }
-
-        Log.d("API_CALL", "Request Body: " + new Gson().toJson(body));
-
-        OtpApi api = ApiClient.getClient().create(OtpApi.class);
-        Call<ProfileModel> call = api.profile(body);
-
-        call.enqueue(new Callback<ProfileModel>() {
-            @Override
-            public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d("API_CALL", "Success: " + new Gson().toJson(response.body()));
-                    Toast.makeText(Personal_informationActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                    populateProfileData(response.body());
-                } else {
-                    Log.e("API_CALL", "Error code: " + response.code() + " Error body: " + response.errorBody());
-                    Toast.makeText(Personal_informationActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ProfileModel> call, Throwable t) {
-                Log.e("API_CALL", "API Failed: " + t.getMessage(), t);
-                Toast.makeText(Personal_informationActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-*/
+    // ------------------- DATE & IMAGE PICKER -------------------
     private void showDatePicker() {
         final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         new DatePickerDialog(
                 this,
-                (DatePicker view, int year1, int month1, int dayOfMonth) ->
-                        binding.etDob.setText(dayOfMonth + "-" + (month1 + 1) + "-" + year1),
-                year, month, day
+                (DatePicker view, int year, int month, int dayOfMonth) ->
+                        binding.etDob.setText(dayOfMonth + "-" + (month + 1) + "-" + year),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
         ).show();
     }
 
@@ -298,15 +228,15 @@ public class Personal_informationActivity extends AppCompatActivity {
     }
 
     private void openCamera() {
-        startActivityForResult(new android.content.Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST);
+        startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST);
     }
 
     private void openGallery() {
-        startActivityForResult(new android.content.Intent(android.content.Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), GALLERY_REQUEST);
+        startActivityForResult(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), GALLERY_REQUEST);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null) {
             if (requestCode == CAMERA_REQUEST) {

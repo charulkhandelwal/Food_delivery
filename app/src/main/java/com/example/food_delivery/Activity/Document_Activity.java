@@ -84,7 +84,7 @@ public class Document_Activity extends AppCompatActivity {
 
         OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
 
-        // --- Aadhaar ---
+
         File aadhaarFrontFile = new File(getFilesDir(), "aadhaar_front.jpg");
         File aadhaarBackFile = new File(getFilesDir(), "aadhaar_back.jpg");
 
@@ -96,7 +96,7 @@ public class Document_Activity extends AppCompatActivity {
                 " | Exists: " + aadhaarBackFile.exists() +
                 " | Size: " + (aadhaarBackFile.exists() ? aadhaarBackFile.length() : 0) + " bytes");
 
-        // --- PAN ---
+
         File panFrontFile = new File(getFilesDir(), "pan_front.jpg");
         File panBackFile = new File(getFilesDir(), "pan_back.jpg");
 
@@ -105,7 +105,7 @@ public class Document_Activity extends AppCompatActivity {
         Log.d("UPLOAD_CHECK", "PAN Back Path: " + panBackFile.getAbsolutePath() +
                 " | Exists: " + panBackFile.exists());
 
-        // --- Driving License ---
+
         File dlFrontFile = new File(getFilesDir(), "dl_front.jpg");
         File dlBackFile = new File(getFilesDir(), "dl_back.jpg");
 
@@ -114,7 +114,7 @@ public class Document_Activity extends AppCompatActivity {
         Log.d("UPLOAD_CHECK", "DL Back Path: " + dlBackFile.getAbsolutePath() +
                 " | Exists: " + dlBackFile.exists());
 
-        // --- RC ---
+
         File rcFrontFile = new File(getFilesDir(), "rc_front.jpg");
         File rcBackFile = new File(getFilesDir(), "rc_back.jpg");
 
@@ -123,7 +123,7 @@ public class Document_Activity extends AppCompatActivity {
         Log.d("UPLOAD_CHECK", "RC Back Path: " + rcBackFile.getAbsolutePath() +
                 " | Exists: " + rcBackFile.exists());
 
-        // --- Prepare Multipart Parts ---
+
         MultipartBody.Part aadhaarFront = prepareFilePart("aadhaarFront", aadhaarFrontFile);
         MultipartBody.Part aadhaarBack = prepareFilePart("aadhaarBack", aadhaarBackFile);
         MultipartBody.Part panFront = prepareFilePart("panFront", panFrontFile);
@@ -133,7 +133,7 @@ public class Document_Activity extends AppCompatActivity {
         MultipartBody.Part rcFront = prepareFilePart("rcFront", rcFrontFile);
         MultipartBody.Part rcBack = prepareFilePart("rcBack", rcBackFile);
 
-        // --- Log Summary for Image Parts ---
+
         Log.d("UPLOAD_SUMMARY", "🧾 IMAGE PARTS STATUS:");
         Log.d("UPLOAD_SUMMARY", "AadhaarFront: " + (aadhaarFront != null ? "✅" : "⚠️ NULL"));
         Log.d("UPLOAD_SUMMARY", "AadhaarBack: " + (aadhaarBack != null ? "✅" : "⚠️ NULL"));
@@ -144,7 +144,7 @@ public class Document_Activity extends AppCompatActivity {
         Log.d("UPLOAD_SUMMARY", "RCFront: " + (rcFront != null ? "✅" : "⚠️ NULL"));
         Log.d("UPLOAD_SUMMARY", "RCBack: " + (rcBack != null ? "✅" : "⚠️ NULL"));
 
-        // --- Account Details ---
+
         String accountNo = "1234567890";
         String ifsc = "SBIN0001234";
         String holderName = "Ravi Sharma";
@@ -159,7 +159,7 @@ public class Document_Activity extends AppCompatActivity {
 
         Log.d("UPLOAD_SUMMARY", "✅ TEXT DATA READY: Account=" + accountNo + ", IFSC=" + ifsc + ", Name=" + holderName);
 
-        // --- Final API Call ---
+
         Log.d("UPLOAD_SUMMARY", "🚀 Starting API call to uploadDocuments()...");
 
         Call<DocumentResponse> call = api.uploadDocuments(
@@ -177,6 +177,8 @@ public class Document_Activity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("UPLOAD_API", "✅ Upload Success: " + response.body().toString());
                     Toast.makeText(Document_Activity.this, "Documents uploaded successfully!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(Document_Activity.this, OrderSuccess.class));
+                    finish();
                 } else {
                     Log.e("UPLOAD_API", "❌ Upload Failed: " + response.code() + " | " + response.message());
                 }
@@ -228,7 +230,7 @@ public class Document_Activity extends AppCompatActivity {
         }
 
         binding.completedPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.VISIBLE : View.GONE);
-        binding.pendingPersonal.setVisibility(View.VISIBLE);
+        binding.pendingPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.GONE : View.VISIBLE);
 
         binding.completedVehicle.setVisibility(vehicleUploaded ? View.VISIBLE : View.GONE);
         binding.pendingVehicle.setVisibility(vehicleUploaded ? View.GONE : View.VISIBLE);
