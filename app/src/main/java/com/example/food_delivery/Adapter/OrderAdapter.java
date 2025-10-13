@@ -1,30 +1,30 @@
 package com.example.food_delivery.Adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.food_delivery.Model.OrderModel;
-import com.example.food_delivery.R;
+import com.example.food_delivery.databinding.OrderItemBinding;
 
 import java.util.List;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
-    public interface OnOrderClickListener {
-        void onConfirmPickupClick(OrderModel order); // Corrected listener for Confirm Pickup
+    public interface OnOrderActionListener {
+        void onConfirmPickup(OrderModel order);    // user pressed Confirm Pickup within item
+        void onItemToggle(OrderModel order);       // item header clicked to expand/collapse
     }
 
-    private List<OrderModel> orders;
-    private OnOrderClickListener listener;
+    private final Context context;
+    private final List<OrderModel> orders;
+    private final OnOrderActionListener listener;
 
-    public OrderAdapter(List<OrderModel> orders, OnOrderClickListener listener) {
+    public OrderAdapter(Context context, List<OrderModel> orders, OnOrderActionListener listener) {
+        this.context = context;
         this.orders = orders;
         this.listener = listener;
     }
@@ -32,15 +32,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.order_item, parent, false);
-        return new OrderViewHolder(view);
+        OrderItemBinding binding = OrderItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new OrderViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OrderAdapter.OrderViewHolder holder, int position) {
-        OrderModel order = orders.get(position);
-        holder.bind(order, listener);
+    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
+        holder.bind(orders.get(position));
     }
 
     @Override
@@ -48,47 +46,42 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orders.size();
     }
 
-    class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderId, tvCustomerName, tvItems, tvPrice, tvAddress, btnConfirmPickup;
-        LinearLayout layout;
-        ImageView imageView;
+    public class OrderViewHolder extends RecyclerView.ViewHolder {
+        private final OrderItemBinding b;
 
-        public OrderViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvOrderId = itemView.findViewById(R.id.tvorderid);
-            tvCustomerName = itemView.findViewById(R.id.tvCustomerName);
-            tvItems = itemView.findViewById(R.id.tvitems);
-            tvPrice = itemView.findViewById(R.id.tvprice);
-            tvAddress = itemView.findViewById(R.id.tvAddress);
-            layout = itemView.findViewById(R.id.layoutdetails);
-            imageView = itemView.findViewById(R.id.ivexpandIcon);
-            btnConfirmPickup = itemView.findViewById(R.id.btnConfirmPickup);
+        public OrderViewHolder(@NonNull OrderItemBinding binding) {
+            super(binding.getRoot());
+            this.b = binding;
         }
 
-        public void bind(final OrderModel order, final OnOrderClickListener listener) {
-            // Order ID
-            tvOrderId.setText(order.getOrderId() != null && !order.getOrderId().isEmpty()
-                    ? "Order #" + order.getOrderId()
-                    : "Order");
+        public void bind(final OrderModel order) {
+            b.tvorderId.setText("Order No. #" + order.getOrderId());
+            b.tvcustomerName.setText(order.getCustomerName());
+            b.tvItems.setText(order.getItems());
+            b.tvprice.setText(order.getPrice());
+            b.tvAddress.setText(order.getAddress().isEmpty() ? "No address selected yet" : "📍 " + order.getAddress());
+            b.tvStatus.setText(order.getStatus());
 
-            tvCustomerName.setText(order.getCustomerName());
-            tvItems.setText(order.getItems());
-            tvPrice.setText(order.getPrice());
-            tvAddress.setText(!order.getAddress().isEmpty() ? "📍 " + order.getAddress() : "No address selected yet");
+            boolean expanded = order.isExpanded();
+            b.layoutdetails.setVisibility(expanded ? android.view.View.VISIBLE : android.view.View.GONE);
+            b.ivexpandIcon.setRotation(expanded ? 180f : 0f);
 
-            // Expand / Collapse
-            layout.setVisibility(order.isExpanded() ? View.VISIBLE : View.GONE);
-            imageView.setRotation(order.isExpanded() ? 180f : 0f);
-
-            // Click on item to expand/collapse
-            itemView.setOnClickListener(v -> {
+            // Expand/collapse on header or icon
+            b.ivexpandIcon.setOnClickListener(v -> {
                 order.setExpanded(!order.isExpanded());
                 notifyItemChanged(getAdapterPosition());
+                if (listener != null) listener.onItemToggle(order);
             });
 
-            // Confirm Pickup Button click
-            btnConfirmPickup.setOnClickListener(v -> {
-                if (listener != null) listener.onConfirmPickupClick(order);
+            b.getRoot().setOnClickListener(v -> {
+                order.setExpanded(!order.isExpanded());
+                notifyItemChanged(getAdapterPosition());
+                if (listener != null) listener.onItemToggle(order);
+            });
+
+            // Confirm Pickup
+            b.btnConfirmPickup.setOnClickListener(v -> {
+                if (listener != null) listener.onConfirmPickup(order);
             });
         }
     }

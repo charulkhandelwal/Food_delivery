@@ -27,7 +27,7 @@ public class personal_Document extends AppCompatActivity {
 
         documentList = DocumentPrefs.getDocumentList(this);
 
-        // Back button
+
         binding.ivBack.setOnClickListener(v -> finish());
 
 
@@ -35,7 +35,7 @@ public class personal_Document extends AppCompatActivity {
         binding.cardPan.setOnClickListener(v -> startActivity(new Intent(this, PANCARD_Activity.class)));
         binding.cardDL.setOnClickListener(v -> startActivity(new Intent(this, DriverLicense_Activity.class)));
 
-        // Submit check
+
         binding.btnSubmit.setOnClickListener(v -> {
             boolean hasAadhaar = false, hasPan = false, hasDl = false;
             for (DocumentModel model : documentList) {

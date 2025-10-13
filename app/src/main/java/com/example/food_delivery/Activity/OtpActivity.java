@@ -14,11 +14,14 @@ import com.example.food_delivery.Api.ApiClient;
 import com.example.food_delivery.Api.OtpApi;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
+import com.example.food_delivery.Socket.SocketManager;
 import com.example.food_delivery.databinding.ActivityOtpBinding;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,7 +37,6 @@ public class OtpActivity extends AppCompatActivity {
         binding = ActivityOtpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         phone = getIntent().getStringExtra("mobile");
         Log.e("phone no", phone);
 
@@ -47,7 +49,7 @@ public class OtpActivity extends AppCompatActivity {
             if (otp.length() != 6) {
                 Toast.makeText(this, "Please enter all 6 digits", Toast.LENGTH_SHORT).show();
             } else {
-                verifyOtpApi(phone, otp); // ✅ Call API here
+                verifyOtpApi(phone, otp);
             }
         });
     }
@@ -67,9 +69,9 @@ public class OtpActivity extends AppCompatActivity {
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (s.length() == 1 && index < otpInputs.length - 1) {
-                        otpInputs[index + 1].requestFocus(); // next box
+                        otpInputs[index + 1].requestFocus();
                     } else if (s.length() == 0 && index > 0) {
-                        otpInputs[index - 1].requestFocus(); // previous box
+                        otpInputs[index - 1].requestFocus();
                     }
                 }
 
@@ -101,16 +103,46 @@ public class OtpActivity extends AppCompatActivity {
             public void onResponse(Call<OtpVerifyResponse> call, Response<OtpVerifyResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     OtpVerifyResponse otpResponse = response.body();
+
                     if (otpResponse.success) {
 
-                        // ✅ Token extract from results and save in SharedPreferences
-                        //if (otpResponse.results != null && otpResponse.results.token != null) {
-                            String token = otpResponse.results.token;
-                            DocumentPrefs.saveToken(OtpActivity.this, token);
-                            Log.e("Token Saved", token);
-                       // }
+                        String token = otpResponse.results.token;
+                        String partnerId = otpResponse.results.partner.id;
+
+                        DocumentPrefs.saveToken(OtpActivity.this, token);
+                        DocumentPrefs.savePartnerId(OtpActivity.this, partnerId);
+
+                        Log.e("Token Saved ✅", token);
+                        Log.e("Partner ID Saved ✅", partnerId);
+
+
+                        SocketManager socketManager = SocketManager.getInstance();
+                        Socket socket = socketManager.getSocket();
+
+                        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+                            @Override
+                            public void call(Object... args) {
+                                try {
+                                    Log.d("Socket", "✅ Connected");
+
+
+                                    socket.emit("partner_online", partnerId);
+                                    Log.d("Socket", "📡 Sent event: partner_online → " + partnerId);
+
+                                } catch (Exception e) {
+                                    Log.e("Socket", "❌ Error sending partner_online: " + e.getMessage());
+                                }
+                            }
+                        });
+
+                        socket.on(Socket.EVENT_CONNECT_ERROR, args -> {
+                            Log.e("Socket", "❌ Connect error: " + args[0]);
+                        });
+
+                        socketManager.connect();
 
                         Toast.makeText(OtpActivity.this, "OTP Verified Successfully", Toast.LENGTH_SHORT).show();
+
 
                         Intent intent = new Intent(OtpActivity.this, Personal_informationActivity.class);
                         startActivity(intent);

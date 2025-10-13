@@ -79,7 +79,7 @@ public class Sign_up extends AppCompatActivity {
     private void callApi() {
 
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
-        // ✅ Direct map me phone number
+
         Map<String, String> body = new HashMap<>();
         body.put("mobile", phone);
 

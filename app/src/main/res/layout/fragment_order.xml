@@ -1,35 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-    </data>
+    <data></data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#FFFFFF">
 
-        <!-- 1. Top Bar -->
+
         <LinearLayout
             android:id="@+id/topBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:padding="10dp"
             android:background="@android:color/white"
-            android:padding="10dp">
+            android:elevation="6dp">
+
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/beg"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="8dp"
                     app:tint="@color/black" />
 
                 <TextView
@@ -37,16 +38,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Orders"
-                    android:textStyle="bold"
                     android:textSize="20sp"
-                    android:textColor="@color/black"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginTop="12dp">
 
                 <RadioGroup
@@ -59,77 +61,67 @@
                         android:id="@+id/radioMeal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Meal"
                         android:button="@null"
                         android:background="@drawable/tab_selector"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="18dp"
                         android:paddingVertical="6dp"
-                        android:textColor="@android:color/black"/>
+                        android:text="Meal" />
 
                     <RadioButton
                         android:id="@+id/radioStore"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Store"
+                        android:layout_marginStart="10dp"
                         android:button="@null"
                         android:background="@drawable/tab_selector"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="18dp"
                         android:paddingVertical="6dp"
-                        android:layout_marginStart="10dp"
-                        android:textColor="@android:color/black"
-                        android:checked="true"/>
+                        android:text="Store"
+                        android:checked="true" />
                 </RadioGroup>
 
                 <Spinner
                     android:id="@+id/dateSpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"/>
+                    android:layout_marginStart="12dp" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 2. No Orders Layout -->
-        <FrameLayout
-            android:id="@+id/layoutNoOrdersContainer"
+
+        <LinearLayout
+            android:id="@+id/layoutNoOrders"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="80dp"> <!-- Top bar height offset -->
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="24dp"
+            android:layout_marginTop="100dp">
 
-            <LinearLayout
-                android:id="@+id/layoutNoOrders"
-                android:orientation="vertical"
+            <ImageView
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:src="@drawable/logoorder" />
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:padding="24dp">
+                android:text="No New Orders"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:textColor="#333" />
+        </LinearLayout>
 
-                <ImageView
-                    android:src="@drawable/logoorder"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:contentDescription="@string/app_name" />
 
-                <TextView
-                    android:text="No New Orders"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginTop="12dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </FrameLayout>
-
-        <!-- 3. Orders List Layout -->
         <LinearLayout
             android:id="@+id/layoutOrderList"
-            android:orientation="vertical"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
-            android:layout_marginTop="80dp">
+            android:orientation="vertical"
+            android:layout_marginTop="110dp"
+            android:padding="8dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerOrders"
@@ -139,79 +131,97 @@
                 android:paddingBottom="12dp" />
         </LinearLayout>
 
-        <!-- 4. Order Detail Layout -->
+
         <ScrollView
             android:id="@+id/layoutOrderDetail"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FAFAFA"
-            android:layout_marginTop="80dp">
+            android:visibility="gone"
+            android:layout_marginTop="110dp"
+            android:padding="12dp"
+            android:background="#FAFAFA">
 
             <LinearLayout
-                android:orientation="vertical"
-                android:padding="16dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/detailOrderId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Order No. #101"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
 
                 <TextView
                     android:id="@+id/tvCustomerName"
-                    android:text="Customer Name"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000"
-                    android:layout_marginBottom="8dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pizza Center"
+                    android:layout_marginTop="8dp" />
 
                 <TextView
                     android:id="@+id/tvOrderItems"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="2 x Pizza, 1 x Coke"
-                    android:textSize="16sp"
-                    android:textColor="#444444"
-                    android:layout_marginBottom="8dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_marginTop="6dp" />
 
                 <TextView
                     android:id="@+id/tvOrderPrice"
-                    android:text="₹ 250"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹250"
                     android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:textColor="#4CAF50"
-                    android:layout_marginBottom="12dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_marginTop="6dp"
+                    android:textColor="#4CAF50" />
 
-                <!-- Address -->
-                <TextView
-                    android:id="@+id/tvOrderAddress"
-                    android:text="Delivery Address: Not selected"
-                    android:textSize="16sp"
-                    android:textColor="#000000"
-                    android:layout_marginBottom="16dp"
+                <!-- status/action area -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:id="@+id/tvDetailStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pickup Pending"
+                        android:background="@drawable/status_pending_bg"
+                        android:padding="8dp"
+                        android:textColor="#fff" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/selectaddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Delivery Address: Not selected"
+                    android:layout_marginTop="12dp" />
 
                 <Button
                     android:id="@+id/btnConfirmPickup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Confirm Pickup"
                     android:textAllCaps="false"
-                    android:backgroundTint="#4CAF50"
-                    android:textColor="#FFFFFF"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="#FF5252"
+                    android:textColor="#FFF" />
             </LinearLayout>
         </ScrollView>
 
-        <!-- 5. Map + Route Tracking Layout -->
+
         <LinearLayout
             android:id="@+id/layoutMapTracking"
             android:visibility="gone"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="80dp">
+            android:layout_marginTop="110dp">
 
             <fragment
                 android:id="@+id/mapFragment"
@@ -220,25 +230,25 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
+
             <TextView
-                android:id="@+id/selectaddress"
+                android:id="@+id/tvMapSelectedAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="\uD83D\uDCCD Tap map to select"
                 android:padding="12dp"
-                android:text="Delivery Address"
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:background="#EEEEEE" />
+                android:background="#EEEEEE"
+                android:textColor="#000" />
 
             <Button
                 android:id="@+id/btnStart"
-                android:text="Start"
-                android:textAllCaps="false"
-                android:backgroundTint="#2196F3"
-                android:textColor="#FFFFFF"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp" />
+                android:text="Start"
+                android:textAllCaps="false"
+                android:layout_margin="12dp"
+                android:backgroundTint="#FF6B6B"
+                android:textColor="#FFF" />
         </LinearLayout>
 
     </FrameLayout>
