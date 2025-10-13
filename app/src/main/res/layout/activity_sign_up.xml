@@ -48,23 +48,41 @@
                 android:textStyle="bold"
                 android:textColor="#000" />
 
-            <!-- Phone input -->
+            <!-- ✅ Phone input with +91 prefix -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/phoneinputlayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:hint="e.g. 9999988888">
+                android:layout_marginTop="18dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etphone"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:inputType="phone"
-                    android:maxLength="10"
-                    android:textColor="#000"
-                    android:textSize="14sp" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tv_country_code"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+91"
+                        android:textColor="#000"
+                        android:textSize="14sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="8dp" />
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etphone"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:inputType="phone"
+                        android:maxLength="10"
+                        android:textColor="#000"
+                        android:textSize="14sp"
+                        android:hint="Enter mobile number" />
+                </LinearLayout>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Terms checkbox -->
@@ -101,7 +119,7 @@
                     android:id="@+id/txtprivacy3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="and"
+                    android:text=" and "
                     android:textSize="12sp"
                     android:textColor="#555" />
 
@@ -114,7 +132,6 @@
                     android:textColor="#FF4A5C"
                     android:textStyle="bold" />
             </LinearLayout>
-
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnsendotp"
