@@ -82,6 +82,7 @@ public class Sign_up extends AppCompatActivity {
         // ✅ Direct map me phone number
         Map<String, String> body = new HashMap<>();
         body.put("mobile", phone);
+        body.put("countryCode", "+91");
 
         Call<OtpResponse> call = api.sendOtp(body);
         call.enqueue(new Callback<OtpResponse>() {

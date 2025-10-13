@@ -69,11 +69,12 @@ public class Document_Activity extends AppCompatActivity {
         binding.back3.setOnClickListener(v -> binding.pendingBank.performClick());
 
         binding.btnSubmit.setOnClickListener(v -> {
-            if (isAllDocumentsUploaded()) {
+            /*if (isAllDocumentsUploaded()) {
                 uploadDocumentsToServer();
             } else {
                 Toast.makeText(this, "Please upload all documents before submitting", Toast.LENGTH_SHORT).show();
-            }
+            }*/
+            uploadDocumentsToServer();
         });
     }
     private void uploadDocumentsToServer() {
