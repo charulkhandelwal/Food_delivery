@@ -69,18 +69,26 @@ public class Order extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentOrderBinding.inflate(inflater, container, false);
 
-
-        SocketManager socketManager = SocketManager.getInstance();
-        socket = socketManager.getSocket();
-        socketManager.connect();
-
         partnerId = DocumentPrefs.getPartnerId(requireContext());
         Log.d("PartnerID", "pid = " + partnerId);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
+        SocketManager socketManager = SocketManager.getInstance();
+        socket = socketManager.getSocket();
+
+        socket.on(Socket.EVENT_CONNECT, args -> {
+            Log.d("SocketEvent", "✅ Connected to server");
+            socket.emit("join", partnerId); // optional
+        });
 
         socket.on("new_order", onNewOrderReceived);
+        socket.connect();
+
+
+
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+
 
         setupDummyOrders();
         setupViews();
@@ -89,7 +97,7 @@ public class Order extends Fragment {
     }
 
 
-    private final Emitter.Listener onNewOrderReceived = args -> {
+ /*   private final Emitter.Listener onNewOrderReceived = args -> {
         if (getActivity() == null) return;
         getActivity().runOnUiThread(() -> {
             try {
@@ -115,6 +123,25 @@ public class Order extends Fragment {
 
             } catch (Exception e) {
                 Log.e("SocketNewOrder", "Error parsing new_order: " + e.getMessage());
+            }
+        });
+    };
+*/
+
+    private final Emitter.Listener onNewOrderReceived = args -> {
+        if (getActivity() == null) return;
+
+        getActivity().runOnUiThread(() -> {
+            try {
+                // Check if any data is received
+                if (args.length > 0 && args[0] != null) {
+                    Log.d("SocketNewOrder", "✅ new_order data received!");
+                    Log.d("SocketNewOrder", "Raw Data → " + args[0].toString());
+                } else {
+                    Log.w("SocketNewOrder", "⚠️ new_order event triggered but no data received!");
+                }
+            } catch (Exception e) {
+                Log.e("SocketNewOrder", "❌ Error in new_order listener: " + e.getMessage());
             }
         });
     };
@@ -224,7 +251,7 @@ public class Order extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(requireContext(), "Please enable location permission", Toast.LENGTH_SHORT).show();
             return;
@@ -244,7 +271,7 @@ public class Order extends Fragment {
                 if (locationResult == null) return;
                 Location loc = locationResult.getLastLocation();
                 if (loc != null) {
-                    sendLocationToSocket(loc.getLatitude(), loc.getLongitude());
+                    sendLocationToSocket(/*loc.getLatitude(), loc.getLongitude()*/26.9124,75.7873);
                 }
             }
         };
