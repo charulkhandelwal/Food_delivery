@@ -13,11 +13,17 @@ import java.util.ArrayList;
 public class DocumentPrefs {
 
     private static final String PREF_NAME = "DocsPrefs";
+
+    // Existing keys
     private static final String KEY_DOC_LIST = "document_list";
-    private static final String KEY_TOKEN = "token"; // 🔥 Token key
+    private static final String KEY_TOKEN = "token";
     private static final String KEY_PARTNER_ID = "partner_id";
 
-    // ----------- Documents List Save / Get -------------
+    // ✅ Newly added keys
+    private static final String KEY_PROFILE = "profile";
+    private static final String KEY_DOCS_UPLOADED = "docs_uploaded";
+
+    // ----------- 📄 Documents List Save / Get -------------
     public static void saveDocumentList(Context context, ArrayList<DocumentModel> list) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -36,48 +42,61 @@ public class DocumentPrefs {
         return new ArrayList<>();
     }
 
-
+    // ----------- 🔑 Token Save / Get / Clear -------------
     public static void saveToken(Context context, String token) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_TOKEN, token);
-        editor.apply();
+        getPrefs(context).edit().putString(KEY_TOKEN, token).apply();
     }
 
     public static String getToken(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_TOKEN, null);
+        return getPrefs(context).getString(KEY_TOKEN, null);
     }
 
     public static void clearToken(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_TOKEN);
-        editor.apply();
+        getPrefs(context).edit().remove(KEY_TOKEN).apply();
     }
 
-
-
-
-   // private static final String KEY_PARTNER_ID = "partner_id";  // 🔥 Add this key
-
+    // ----------- 🧍 Partner ID Save / Get / Clear -------------
     public static void savePartnerId(Context context, String partnerId) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_PARTNER_ID, partnerId);
-        editor.apply();
+        getPrefs(context).edit().putString(KEY_PARTNER_ID, partnerId).apply();
     }
 
     public static String getPartnerId(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_PARTNER_ID, null);
+        return getPrefs(context).getString(KEY_PARTNER_ID, null);
     }
 
     public static void clearPartnerId(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_PARTNER_ID);
-        editor.apply();
+        getPrefs(context).edit().remove(KEY_PARTNER_ID).apply();
     }
 
+    // ----------- 🧾 Profile Save / Get (New) -------------
+    public static void saveProfile(Context context, String profileJson) {
+        getPrefs(context).edit().putString(KEY_PROFILE, profileJson).apply();
+    }
+
+    public static String getProfile(Context context) {
+        return getPrefs(context).getString(KEY_PROFILE, null);
+    }
+
+    public static void clearProfile(Context context) {
+        getPrefs(context).edit().remove(KEY_PROFILE).apply();
+    }
+
+    // ----------- ✅ Docs Upload Status -------------
+    public static void setDocsUploaded(Context context, boolean uploaded) {
+        getPrefs(context).edit().putBoolean(KEY_DOCS_UPLOADED, uploaded).apply();
+    }
+
+    public static boolean getDocsUploaded(Context context) {
+        return getPrefs(context).getBoolean(KEY_DOCS_UPLOADED, false);
+    }
+
+    // ----------- 🔄 Clear All -------------
+    public static void clearAll(Context context) {
+        getPrefs(context).edit().clear().apply();
+    }
+
+    // ----------- Internal Helper -------------
+    private static SharedPreferences getPrefs(Context context) {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    }
 }
