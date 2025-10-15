@@ -26,14 +26,15 @@ import com.example.food_delivery.databinding.ActivityPersonalInformationBinding;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -50,9 +51,22 @@ public class Personal_informationActivity extends AppCompatActivity {
     private Bitmap selectedProfileImage = null;
     private JSONArray citiesArray;
 
+    // ✅ Valid blood group list
+    private final List<String> validBloodGroups = Arrays.asList(
+            "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ✅ If profile already saved, skip this screen
+        if (DocumentPrefs.getProfile(this) != null) {
+            startActivity(new Intent(this, Document_Activity.class));
+            finish();
+            return;
+        }
+
         binding = ActivityPersonalInformationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -63,10 +77,9 @@ public class Personal_informationActivity extends AppCompatActivity {
         loadCitiesData(); // Load cities from JSON
     }
 
-
     private void loadCitiesData() {
         try {
-            InputStream is = getAssets().open("cities.json"); // Make sure cities.json exists in assets
+            InputStream is = getAssets().open("cities.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -79,34 +92,13 @@ public class Personal_informationActivity extends AppCompatActivity {
                 cityList.add(citiesArray.getString(i));
             }
 
-            ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_dropdown_item, cityList);
+            ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(
+                    this, android.R.layout.simple_spinner_dropdown_item, cityList);
             binding.spinnerCity.setAdapter(cityAdapter);
 
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to load cities", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // ------------------- PROFILE DATA METHODS -------------------
-    private void populateProfileData(ProfileModel profile) {
-        if (profile != null && profile.results != null) {
-            binding.etFirstName.setText(profile.results.firstName);
-            binding.etLastName.setText(profile.results.lastName);
-            binding.etDob.setText(profile.results.dob);
-            binding.etPrimaryMobile.setText(profile.results.mobile);
-            binding.etBloodGroup.setText(profile.results.bloodGroup);
-            binding.etAddress.setText(profile.results.address);
-            binding.etFatherName.setText(profile.results.fatherName);
-            binding.etSecondaryMobile.setText(profile.results.secondaryMobile);
-
-            // Set city if available
-            if (profile.results.city != null) {
-                ArrayAdapter adapter = (ArrayAdapter) binding.spinnerCity.getAdapter();
-                int cityPos = adapter.getPosition(profile.results.city);
-                binding.spinnerCity.setSelection(cityPos);
-            }
         }
     }
 
@@ -117,32 +109,34 @@ public class Personal_informationActivity extends AppCompatActivity {
         String dobStr = binding.etDob.getText().toString().trim();
         String primaryMobileStr = binding.etPrimaryMobile.getText().toString().trim();
         String secondaryMobileStr = binding.etSecondaryMobile.getText().toString().trim();
-        String bloodGroupStr = binding.etBloodGroup.getText().toString().trim();
+        String bloodGroupStr = binding.etBloodGroup.getText().toString().trim().toUpperCase();
         String cityStr = binding.spinnerCity.getSelectedItem().toString().trim();
         String addressStr = binding.etAddress.getText().toString().trim();
-        String languagesStr = "hindi,english"; // static for now
+        String languagesStr = "hindi,english";
 
-        if (firstNameStr.isEmpty()) { binding.etFirstName.setError("First name required"); binding.etFirstName.requestFocus(); return; }
-        if (lastNameStr.isEmpty()) { binding.etLastName.setError("Last name required"); binding.etLastName.requestFocus(); return; }
-        if (fatherNameStr.isEmpty()) { binding.etFatherName.setError("Father name required"); binding.etFatherName.requestFocus(); return; }
-        if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); binding.etDob.requestFocus(); return; }
-        if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); binding.etPrimaryMobile.requestFocus(); return; }
-        if (bloodGroupStr.isEmpty()) { binding.etBloodGroup.setError("Blood group required"); binding.etBloodGroup.requestFocus(); return; }
+        if (firstNameStr.isEmpty()) { binding.etFirstName.setError("First name required"); return; }
+        if (lastNameStr.isEmpty()) { binding.etLastName.setError("Last name required"); return; }
+        if (fatherNameStr.isEmpty()) { binding.etFatherName.setError("Father name required"); return; }
+        if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); return; }
+        if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); return; }
+
+        // ✅ Blood group validation
+        if (bloodGroupStr.isEmpty()) {
+            binding.etBloodGroup.setError("Blood group required");
+            return;
+        } else if (!validBloodGroups.contains(bloodGroupStr)) {
+            binding.etBloodGroup.setError("Enter valid blood group (e.g. A+, B-, O+)");
+            return;
+        }
+
         if (cityStr.isEmpty()) { Toast.makeText(this, "Please select a city", Toast.LENGTH_SHORT).show(); return; }
-        if (addressStr.isEmpty()) { binding.etAddress.setError("Address required"); binding.etAddress.requestFocus(); return; }
+        if (addressStr.isEmpty()) { binding.etAddress.setError("Address required"); return; }
         if (selectedProfileImage == null) { Toast.makeText(this, "Profile image required", Toast.LENGTH_SHORT).show(); return; }
 
         Log.d("PROFILE_DEBUG", "firstName: " + firstNameStr);
-        Log.d("PROFILE_DEBUG", "lastName: " + lastNameStr);
-        Log.d("PROFILE_DEBUG", "fatherName: " + fatherNameStr);
-        Log.d("PROFILE_DEBUG", "dob: " + dobStr);
-        Log.d("PROFILE_DEBUG", "primaryMobile: " + primaryMobileStr);
-        Log.d("PROFILE_DEBUG", "secondaryMobile: " + secondaryMobileStr);
         Log.d("PROFILE_DEBUG", "bloodGroup: " + bloodGroupStr);
-        Log.d("PROFILE_DEBUG", "city: " + cityStr);
-        Log.d("PROFILE_DEBUG", "address: " + addressStr);
-        Log.d("PROFILE_DEBUG", "languages: " + languagesStr);
 
+        // Prepare request bodies
         RequestBody firstName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), firstNameStr);
         RequestBody lastName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), lastNameStr);
         RequestBody fatherName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), fatherNameStr);
@@ -161,7 +155,6 @@ public class Personal_informationActivity extends AppCompatActivity {
             byte[] imageBytes = baos.toByteArray();
             RequestBody requestFile = RequestBody.create(okhttp3.MediaType.parse("image/*"), imageBytes);
             profile = MultipartBody.Part.createFormData("profile", "profile.jpg", requestFile);
-            Log.d("PROFILE_DEBUG", "Profile image attached, size: " + imageBytes.length + " bytes");
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to prepare image", Toast.LENGTH_SHORT).show();
@@ -178,8 +171,14 @@ public class Personal_informationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("PROFILE_DEBUG", "API Success: " + new Gson().toJson(response.body()));
-                    Toast.makeText(Personal_informationActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                    // ✅ Save profile locally to skip next time
+                    String profileJson = new Gson().toJson(response.body());
+                    DocumentPrefs.saveProfile(Personal_informationActivity.this, profileJson);
+
+                    Toast.makeText(Personal_informationActivity.this,
+                            "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+
+                    // Move to Document upload
                     startActivity(new Intent(Personal_informationActivity.this, Document_Activity.class));
                     finish();
                 } else {
@@ -196,7 +195,6 @@ public class Personal_informationActivity extends AppCompatActivity {
         });
     }
 
-    // ------------------- DATE & IMAGE PICKER -------------------
     private void showDatePicker() {
         final Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(
@@ -214,7 +212,7 @@ public class Personal_informationActivity extends AppCompatActivity {
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Select Image")
                 .setItems(options, (dialog, which) -> {
-                    if (which == 0) { // Camera
+                    if (which == 0) {
                         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                                 != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);

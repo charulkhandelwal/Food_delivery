@@ -41,6 +41,20 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
+
+
+
+                <TextView
+                    android:id="@+id/tvSocketStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Socket: Not Connected"
+                    android:textColor="#FFFFFF"
+                    android:background="#FF5252"
+                    android:padding="8dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"/>
+
             </LinearLayout>
 
 
