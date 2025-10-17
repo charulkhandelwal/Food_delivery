@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // tumhara xml
+        setContentView(R.layout.activity_main);
 
         btnOrders = findViewById(R.id.btnOrders);
         btnAccount = findViewById(R.id.btnAccount);

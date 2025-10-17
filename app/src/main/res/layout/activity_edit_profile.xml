@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -18,7 +19,7 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Profile Image -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -27,14 +28,15 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/imgProfile"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:src="@drawable/log"
                     android:background="@drawable/bg_profile_circle"
                     android:scaleType="centerCrop"
-                    android:padding="5dp" />
+                    android:padding="5dp"
+                    app:shapeAppearanceOverlay="@style/CircleImage"/>
 
                 <TextView
                     android:id="@+id/tvChangePhoto"
@@ -46,7 +48,7 @@
                     android:layout_marginTop="8dp" />
             </LinearLayout>
 
-            <!-- Name -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -55,17 +57,18 @@
                 android:textColor="@color/black"
                 android:layout_marginTop="8dp" />
 
-            <EditText
+            <TextView
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_edittext"
                 android:hint="Enter your name"
                 android:paddingStart="12dp"
+                android:padding="12dp"
                 android:textSize="16sp"
                 android:inputType="textPersonName" />
 
-            <!-- Mobile -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -74,36 +77,98 @@
                 android:textColor="@color/black"
                 android:layout_marginTop="12dp" />
 
-            <EditText
+            <TextView
                 android:id="@+id/etMobile"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_edittext"
                 android:hint="Enter your mobile number"
                 android:paddingStart="12dp"
+                android:padding="12dp"
                 android:inputType="phone"
                 android:textSize="16sp" />
 
-            <!-- Email -->
+
+            <TextView
+                android:id="@+id/tvDob"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date of Birth"
+                android:textColor="@color/dark_grey"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/etDob"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="dd-mm-yyyy"
+                android:focusable="false"
+                android:drawableEnd="@drawable/ic_calender"
+                android:background="@drawable/edittext_bg"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp" />
+
+
+
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email"
+                android:text="BloodGroup"
                 android:textSize="14sp"
                 android:textColor="@color/black"
                 android:layout_marginTop="12dp" />
 
-            <EditText
-                android:id="@+id/etEmail"
+            <TextView
+                android:layout_marginTop="5dp"
+                android:id="@+id/etBloodGroup"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_edittext"
-                android:hint="Enter your email"
+                android:hint="Enter your BloodGroup"
+                android:padding="12dp"
+                android:paddingStart="12dp"
+                android:inputType="textEmailAddress"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="City"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_marginTop="5dp"
+                android:id="@+id/etCity"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="Enter your city name"
+                android:padding="12dp"
+                android:paddingStart="12dp"
+                android:inputType="textEmailAddress"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_marginTop="5dp"
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="Enter your Address"
+                android:padding="12dp"
                 android:paddingStart="12dp"
                 android:inputType="textEmailAddress"
                 android:textSize="16sp" />
 
-            <!-- Save Button -->
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"

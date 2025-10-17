@@ -27,7 +27,7 @@ public class Sign_up extends AppCompatActivity {
 
     ActivitySignUpBinding binding;
     String phone;
-    String countryCode = "+91"; // Default country code
+    String countryCode = "+91";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,24 +49,24 @@ public class Sign_up extends AppCompatActivity {
         }).start();
 
 
-        // 🔹 Button click for sending OTP
+
         binding.btnsendotp.setOnClickListener(view -> {
             phone = binding.etphone.getText() != null ?
                     binding.etphone.getText().toString().trim() : "";
 
-            // ✅ Validation
+
             if (TextUtils.isEmpty(phone)) {
                 binding.etphone.setError("Please enter phone number");
                 binding.etphone.requestFocus();
                 return;
             }
 
-            // If number starts with +91, clean it up
+
             if (phone.startsWith("+91")) {
                 phone = phone.replace("+91", "").trim();
             }
 
-            // Validate 10 digit mobile number
+
             if (phone.length() != 10 || !phone.matches("\\d{10}")) {
                 binding.etphone.setError("Enter valid 10 digit mobile number");
                 binding.etphone.requestFocus();

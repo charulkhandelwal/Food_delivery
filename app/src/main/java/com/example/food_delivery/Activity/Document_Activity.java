@@ -49,6 +49,7 @@ public class Document_Activity extends AppCompatActivity {
         documentList = DocumentPrefs.getDocumentList(this);
         checkDocsStatus();
 
+
         binding.pendingPersonal.setOnClickListener(v -> {
             Intent intent = new Intent(this, personal_Document.class);
             documentLauncher.launch(intent);
@@ -64,9 +65,11 @@ public class Document_Activity extends AppCompatActivity {
             documentLauncher.launch(intent);
         });
 
+
         binding.backiv1.setOnClickListener(v -> binding.pendingPersonal.performClick());
         binding.backiv2.setOnClickListener(v -> binding.pendingVehicle.performClick());
         binding.back3.setOnClickListener(v -> binding.pendingBank.performClick());
+
 
         binding.btnSubmit.setOnClickListener(v -> {
             if (isAllDocumentsUploaded()) {
@@ -78,11 +81,11 @@ public class Document_Activity extends AppCompatActivity {
     }
 
     private void uploadDocumentsToServer() {
-
         String token = DocumentPrefs.getToken(this);
         Log.d("UPLOAD_DOCS", "Token: " + token);
 
         OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
+
 
         File aadhaarFrontFile = new File(getFilesDir(), "aadhaar_front.jpg");
         File aadhaarBackFile = new File(getFilesDir(), "aadhaar_back.jpg");
@@ -125,16 +128,23 @@ public class Document_Activity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("UPLOAD_API", "✅ Upload Success: " + response.body().toString());
                     Toast.makeText(Document_Activity.this, "Documents uploaded successfully!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(Document_Activity.this, OrderSuccess.class));
+
+
+                    DocumentPrefs.setDocsUploaded(Document_Activity.this, true);
+
+
+                    startActivity(new Intent(Document_Activity.this, MainActivity.class));
                     finish();
                 } else {
                     Log.e("UPLOAD_API", "❌ Upload Failed: " + response.code() + " | " + response.message());
+                    Toast.makeText(Document_Activity.this, "Upload failed. Try again.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<DocumentResponse> call, Throwable t) {
                 Log.e("UPLOAD_API", "❌ Error during upload: " + t.getMessage(), t);
+                Toast.makeText(Document_Activity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -144,11 +154,11 @@ public class Document_Activity extends AppCompatActivity {
             RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
             return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
         } else {
+            Log.w("UPLOAD_API", "⚠️ Missing file: " + partName);
             return null;
         }
     }
 
-    // ✅ FIXED METHOD — now checks front/back names correctly
     private void checkDocsStatus() {
         boolean aadhaarUploaded = false;
         boolean panUploaded = false;
@@ -156,23 +166,25 @@ public class Document_Activity extends AppCompatActivity {
         boolean vehicleUploaded = false;
         boolean bankUploaded = false;
 
-        for (DocumentModel model : documentList) {
-            String name = model.getDocName();
+        if (documentList != null) {
+            for (DocumentModel model : documentList) {
+                String name = model.getDocName();
 
-            if (name.contains("aadhaar_front") || name.contains("aadhaar_back"))
-                aadhaarUploaded = true;
+                if (name.contains("aadhaar_front") || name.contains("aadhaar_back"))
+                    aadhaarUploaded = true;
 
-            if (name.contains("pan_front") || name.contains("pan_back"))
-                panUploaded = true;
+                if (name.contains("pan_front") || name.contains("pan_back"))
+                    panUploaded = true;
 
-            if (name.contains("dl_front") || name.contains("dl_back"))
-                dlUploaded = true;
+                if (name.contains("dl_front") || name.contains("dl_back"))
+                    dlUploaded = true;
 
-            if (name.contains("vehicle_front") || name.contains("vehicle_back"))
-                vehicleUploaded = true;
+                if (name.contains("vehicle_front") || name.contains("vehicle_back"))
+                    vehicleUploaded = true;
 
-            if (name.contains("bank"))
-                bankUploaded = true;
+                if (name.contains("bank"))
+                    bankUploaded = true;
+            }
         }
 
         binding.completedPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.VISIBLE : View.GONE);
@@ -185,7 +197,6 @@ public class Document_Activity extends AppCompatActivity {
         binding.pendingBank.setVisibility(bankUploaded ? View.GONE : View.VISIBLE);
     }
 
-    // ✅ FIXED METHOD — same logic as above
     private boolean isAllDocumentsUploaded() {
         boolean aadhaarUploaded = false;
         boolean panUploaded = false;
@@ -193,23 +204,25 @@ public class Document_Activity extends AppCompatActivity {
         boolean vehicleUploaded = false;
         boolean bankUploaded = false;
 
-        for (DocumentModel model : documentList) {
-            String name = model.getDocName();
+        if (documentList != null) {
+            for (DocumentModel model : documentList) {
+                String name = model.getDocName();
 
-            if (name.contains("aadhaar_front") || name.contains("aadhaar_back"))
-                aadhaarUploaded = true;
+                if (name.contains("aadhaar_front") || name.contains("aadhaar_back"))
+                    aadhaarUploaded = true;
 
-            if (name.contains("pan_front") || name.contains("pan_back"))
-                panUploaded = true;
+                if (name.contains("pan_front") || name.contains("pan_back"))
+                    panUploaded = true;
 
-            if (name.contains("dl_front") || name.contains("dl_back"))
-                dlUploaded = true;
+                if (name.contains("dl_front") || name.contains("dl_back"))
+                    dlUploaded = true;
 
-            if (name.contains("vehicle_front") || name.contains("vehicle_back"))
-                vehicleUploaded = true;
+                if (name.contains("vehicle_front") || name.contains("vehicle_back"))
+                    vehicleUploaded = true;
 
-            if (name.contains("bank"))
-                bankUploaded = true;
+                if (name.contains("bank"))
+                    bankUploaded = true;
+            }
         }
 
         return aadhaarUploaded && panUploaded && dlUploaded && vehicleUploaded && bankUploaded;

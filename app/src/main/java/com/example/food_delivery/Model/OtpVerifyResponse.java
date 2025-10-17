@@ -10,6 +10,7 @@ public class OtpVerifyResponse {
     public static class Results {
         public String token;
         public Partner partner;
+        public boolean isNewUser;
     }
 
     // Nested Partner class

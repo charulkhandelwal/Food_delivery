@@ -2,6 +2,7 @@ package com.example.food_delivery.Api;
 
 import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.DocumentResponse;
+import com.example.food_delivery.Model.GetProfileResponse;
 import com.example.food_delivery.Model.OtpResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.Model.ProfileModel;
@@ -12,6 +13,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -72,7 +74,7 @@ public interface OtpApi {
             @Part("ifscCode") RequestBody ifscCode,
             @Part("name") RequestBody name
 
-            // UserId (if needed for backend mapping)
-           // @Part("userId") RequestBody userId
     );
+    @GET("delivery-partner/profile")
+    Call<GetProfileResponse> getProfile();
 }

@@ -14,16 +14,16 @@ public class DocumentPrefs {
 
     private static final String PREF_NAME = "DocsPrefs";
 
-    // Existing keys
+
     private static final String KEY_DOC_LIST = "document_list";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_PARTNER_ID = "partner_id";
 
-    // ✅ Newly added keys
+
     private static final String KEY_PROFILE = "profile";
     private static final String KEY_DOCS_UPLOADED = "docs_uploaded";
 
-    // ----------- 📄 Documents List Save / Get -------------
+
     public static void saveDocumentList(Context context, ArrayList<DocumentModel> list) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -55,7 +55,7 @@ public class DocumentPrefs {
         getPrefs(context).edit().remove(KEY_TOKEN).apply();
     }
 
-    // ----------- 🧍 Partner ID Save / Get / Clear -------------
+
     public static void savePartnerId(Context context, String partnerId) {
         getPrefs(context).edit().putString(KEY_PARTNER_ID, partnerId).apply();
     }
@@ -68,7 +68,7 @@ public class DocumentPrefs {
         getPrefs(context).edit().remove(KEY_PARTNER_ID).apply();
     }
 
-    // ----------- 🧾 Profile Save / Get (New) -------------
+
     public static void saveProfile(Context context, String profileJson) {
         getPrefs(context).edit().putString(KEY_PROFILE, profileJson).apply();
     }
@@ -81,7 +81,7 @@ public class DocumentPrefs {
         getPrefs(context).edit().remove(KEY_PROFILE).apply();
     }
 
-    // ----------- ✅ Docs Upload Status -------------
+
     public static void setDocsUploaded(Context context, boolean uploaded) {
         getPrefs(context).edit().putBoolean(KEY_DOCS_UPLOADED, uploaded).apply();
     }
@@ -90,12 +90,12 @@ public class DocumentPrefs {
         return getPrefs(context).getBoolean(KEY_DOCS_UPLOADED, false);
     }
 
-    // ----------- 🔄 Clear All -------------
+
     public static void clearAll(Context context) {
         getPrefs(context).edit().clear().apply();
     }
 
-    // ----------- Internal Helper -------------
+
     private static SharedPreferences getPrefs(Context context) {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
