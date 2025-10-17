@@ -1,8 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Food_delivery" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Status bar color (white background with dark icons) -->
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Optional: Set your navigation bar color (if you want white too) -->
+        <item name="android:navigationBarColor">@color/white</item>
+
+        <!-- You can also define your app colors here if needed -->
+        <!-- <item name="colorPrimary">@color/primary</item> -->
+        <!-- <item name="colorSecondary">@color/secondary</item> -->
     </style>
 
     <style name="Theme.Food_delivery" parent="Base.Theme.Food_delivery" />

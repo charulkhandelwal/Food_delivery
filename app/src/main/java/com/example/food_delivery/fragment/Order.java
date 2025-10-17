@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.food_delivery.Adapter.OrderAdapter;
+import com.example.food_delivery.Api.ApiClient;
+import com.example.food_delivery.Api.OtpApi;
 import com.example.food_delivery.Model.OrderModel;
 import com.example.food_delivery.R;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
@@ -35,6 +37,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -45,12 +48,16 @@ import java.util.Locale;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class Order extends Fragment {
 
     private FragmentOrderBinding binding;
-    private List<OrderModel> orderList;
-    private OrderModel selectedOrder;
+    private List<OrderModel.ResultsBean> orderList = new ArrayList<>();
+    private OrderModel.ResultsBean selectedOrder;
 
     private Marker selectedMarker;
     private LatLng selectedLatLng;
@@ -73,105 +80,194 @@ public class Order extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentOrderBinding.inflate(inflater, container, false);
 
-        // ✅ Setup socket connection
+        partnerId = DocumentPrefs.getPartnerId(requireContext());
+        Log.d(TAG, "PartnerID = " + partnerId);
+
+
+        // ✅ Socket initialization
         SocketManager socketManager = SocketManager.getInstance();
         socket = socketManager.getSocket();
+
+        // Attach fragment-specific listener before connect
+        socket.on("new_order", onNewOrderReceived);
+
+        // Connect socket
         socketManager.connect();
-
-        partnerId = DocumentPrefs.getPartnerId(requireContext());
-        Log.d(TAG, "Partner ID = " + partnerId);
-
+        sendSelectedLocationToSocket(25.4891177, 74.3300726);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
-        // ✅ Socket status logs
-        socket.on(Socket.EVENT_CONNECT, args -> Log.d(TAG, "✅ Socket connected"));
-        socket.on(Socket.EVENT_DISCONNECT, args -> Log.d(TAG, "⚠️ Socket disconnected"));
-        socket.on(Socket.EVENT_CONNECT_ERROR, args -> Log.e(TAG, "❌ Socket connect error: " + args[0]));
-
-        setupDummyOrders();
-        setupViews();
-
-        // ✅ Listen for new orders from socket
-        socket.on("new_order", args -> {
-            if (args.length > 0) {
-                try {
-                    JSONObject data = (JSONObject) args[0];
-                    String orderId = data.optString("orderId");
-                    String restaurantName = data.optJSONObject("restaurant") != null
-                            ? data.getJSONObject("restaurant").optString("name")
-                            : "";
-                    JSONObject pickupLocation = data.optJSONObject("pickupLocation");
-                    double lat = pickupLocation != null ? pickupLocation.optDouble("lat") : 0;
-                    double lng = pickupLocation != null ? pickupLocation.optDouble("lng") : 0;
-
-                    String message = data.optString("message");
-
-                    Log.d(TAG, " New Order Received");
-                    Log.d(TAG, "Order ID: " + orderId);
-                    Log.d(TAG, "Restaurant Name: " + restaurantName);
-                    Log.d(TAG, "Pickup Lat/Lng: " + lat + ", " + lng);
-                    Log.d(TAG, "Message: " + message);
-
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "📦 New Order: " + message, Toast.LENGTH_LONG).show();
-
-                        OrderModel newOrder = new OrderModel(orderId, restaurantName, "2x Item", "₹250", lat + ", " + lng, "Pickup Pending");
-                        newOrder.setNew(true);
-                        orderList.add(0, newOrder);
-                        adapter.notifyItemInserted(0);
-                        binding.recyclerOrders.scrollToPosition(0);
-                        binding.layoutNoOrders.setVisibility(View.GONE);
-                    });
-
-                } catch (Exception e) {
-                    Log.e(TAG, "⚠️ Error parsing new_order: " + e.getMessage());
-                }
-            }
-        });
-
+        loadActiveOrders();
         return binding.getRoot();
     }
 
-    // ✅ Dummy data
-    private void setupDummyOrders() {
-        orderList = new ArrayList<>();
-        orderList.add(new OrderModel("11250", "Pickup Center-1", "Order Items: 2x, 1x", "₹2300", "Nikhita Stores, Andheri East", "Pickup Pending"));
-        orderList.add(new OrderModel("11251", "Pickup Center-2", "Order Items: Atta Ladoo", "₹150", "", "Pickup Rescheduled"));
-        orderList.add(new OrderModel("11252", "Delivery", "Besan Ladoo - Qty 2", "₹1200", "", "Delivery Pending"));
+    private void loadActiveOrders() {
+        OtpApi api = ApiClient.getClient().create(OtpApi.class);
+        String token = DocumentPrefs.getToken(requireContext());
+
+        Call<OrderModel> call = api.getActivOrders("Bearer " + token);
+        call.enqueue(new Callback<OrderModel>() {
+            @Override
+            public void onResponse(Call<OrderModel> call, Response<OrderModel> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
+                    orderList.clear();
+                    orderList.addAll(response.body().getResults());
+                    if (orderList.isEmpty()) {
+                        binding.layoutNoOrders.setVisibility(View.VISIBLE);
+                        binding.layoutOrderList.setVisibility(View.GONE);
+                    } else {
+                        binding.layoutNoOrders.setVisibility(View.GONE);
+                        binding.layoutOrderList.setVisibility(View.VISIBLE);
+                    }
+                    setupAdapter();
+                }
+                else {
+                    // 👇 Add these lines before the toast
+                    Log.e("API_RESPONSE_CODE", "Code: " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            Log.e("API_ERROR_BODY", response.errorBody().string());
+                        } else if (response.body() != null) {
+                            Log.e("API_RESPONSE_BODY", new Gson().toJson(response.body()));
+                        } else {
+                            Log.e("API_RESPONSE_BODY", "Body is null");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Toast.makeText(requireContext(), "Failed to fetch orders", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderModel> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    /*private final Emitter.Listener onNewOrderReceived = args -> {
+        if (getActivity() == null) return;
 
-    private void setupViews() {
+        getActivity().runOnUiThread(() -> {
+            try {
+                // Check if any data is received
+                if (args.length > 0 && args[0] != null) {
+                    Log.d("SocketNewOrder", "✅ new_order data received!");
+                    Log.d("SocketNewOrder", "Raw Data → " + args[0].toString());
+                } else {
+                    Log.w("SocketNewOrder", "⚠️ new_order event triggered but no data received!");
+                }
+            } catch (Exception e) {
+                Log.e("SocketNewOrder", "❌ Error in new_order listener: " + e.getMessage());
+            }
+        });
+    };*/
+
+    private final Emitter.Listener onNewOrderReceived = args -> {
+        if (getActivity() == null) return;
+
+        getActivity().runOnUiThread(() -> {
+            try {
+                if (args.length > 0 && args[0] != null) {
+                    Log.d("SocketNewOrder", "✅ new_order data received!");
+                    Log.d("SocketNewOrder", "Raw Data → " + args[0].toString());
+
+                    JSONObject obj = new JSONObject(args[0].toString());
+
+                    // 🆕 Create a new temporary order model
+                    OrderModel.ResultsBean newOrder = new OrderModel.ResultsBean();
+                    newOrder.setOrderId(obj.optString("orderId", ""));
+                    newOrder.setStatus("Pending");
+                    newOrder.setNew(true); // mark as new (for highlight, etc.)
+
+                    // Restaurant info
+                    JSONObject restaurantObj = obj.optJSONObject("restaurantId");
+                    if (restaurantObj != null) {
+                        OrderModel.ResultsBean.RestaurantDataBean restData =
+                                new OrderModel.ResultsBean.RestaurantDataBean();
+                        restData.set_id(restaurantObj.optString("_id", ""));
+                        restData.setName(restaurantObj.optString("name", ""));
+                        newOrder.setRestaurantData(restData);
+                    }
+
+                    // Pickup location
+                    JSONObject pickupLoc = obj.optJSONObject("pickupLocation");
+                    if (pickupLoc != null) {
+                        OrderModel.ResultsBean.AddressBean addr =
+                                new OrderModel.ResultsBean.AddressBean();
+                        addr.setCity("Pickup @ " + obj.optString("restaurantName", "Unknown"));
+                        newOrder.setAddress(addr);
+                    }
+
+                    // Add message as dummy price or info if needed
+                    newOrder.setPaymentStatus(obj.optString("message", ""));
+
+                    // 🧠 Add it to top of the list (like new order)
+                    orderList.add(0, newOrder);
+
+                    // 🧾 Update adapter
+                    if (adapter != null) {
+                        adapter.notifyItemInserted(0);
+                        binding.recyclerOrders.scrollToPosition(0);
+                    } else {
+                        setupAdapter();
+                    }
+
+                    // 🌀 Optionally refresh via API to sync all
+                    loadActiveOrders();
+
+                    Toast.makeText(requireContext(),
+                            "🆕 " + obj.optString("message", "New order received!"),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.w("SocketNewOrder", "⚠️ new_order event triggered but no data received!");
+                }
+            } catch (Exception e) {
+                Log.e("SocketNewOrder", "❌ Error parsing new_order: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+    };
+
+
+
+    private void setupAdapter() {
         binding.layoutNoOrders.setVisibility(orderList.isEmpty() ? View.VISIBLE : View.GONE);
         binding.layoutOrderList.setVisibility(orderList.isEmpty() ? View.GONE : View.VISIBLE);
-        binding.layoutOrderDetail.setVisibility(View.GONE);
         binding.layoutMapTracking.setVisibility(View.GONE);
 
         binding.recyclerOrders.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new OrderAdapter(getContext(), orderList, new OrderAdapter.OnOrderActionListener() {
             @Override
-            public void onConfirmPickup(OrderModel order) {
+            public void onConfirmPickup(OrderModel.ResultsBean order) {
                 selectedOrder = order;
                 order.setNew(false);
                 adapter.notifyDataSetChanged();
-                showOrderDetail(order);
+                if (selectedOrder != null) openMapForSelectedOrder();
+                else
+                    Toast.makeText(requireContext(), "Select an order first", Toast.LENGTH_SHORT).show();
+//                showOrderDetail(order);
             }
 
             @Override
-            public void onItemToggle(OrderModel order) {}
+            public void onItemToggle(OrderModel.ResultsBean order) {}
         });
         binding.recyclerOrders.setAdapter(adapter);
 
-        // ✅ Confirm Pickup → Open Map
+       /* // ✅ Confirm Pickup → Open Map
         binding.btnConfirmPickup.setOnClickListener(v -> {
-            if (selectedOrder != null) openMapForSelectedOrder();
-            else Toast.makeText(requireContext(), "Select an order first", Toast.LENGTH_SHORT).show();
-        });
+
+        });*/
 
         // ✅ Start button → test location + socket emit
         binding.btnStart.setOnClickListener(v -> {
             if (selectedLatLng != null) {
-                selectedOrder.setAddress(selectedAddress);
+                if (selectedOrder.getAddress() == null) {
+                    selectedOrder.setAddress(new OrderModel.ResultsBean.AddressBean());
+                }
+                selectedOrder.getAddress().setCity(selectedAddress);
                 Toast.makeText(requireContext(), "Delivery Started to " + selectedAddress, Toast.LENGTH_SHORT).show();
                 sendSelectedLocationToSocket(selectedLatLng.latitude, selectedLatLng.longitude);
                 startLocationUpdates();
@@ -184,47 +280,62 @@ public class Order extends Fragment {
     }
 
     // ✅ Show order detail view
-    private void showOrderDetail(OrderModel order) {
+    private void showOrderDetail(OrderModel.ResultsBean order) {
         binding.layoutNoOrders.setVisibility(View.GONE);
         binding.layoutOrderList.setVisibility(View.GONE);
-        binding.layoutOrderDetail.setVisibility(View.VISIBLE);
         binding.layoutMapTracking.setVisibility(View.GONE);
-
-        binding.detailOrderId.setText("Order No. #" + order.getOrderId());
-        binding.tvCustomerName.setText(order.getCustomerName());
-        binding.tvOrderItems.setText(order.getItems());
-        binding.tvOrderPrice.setText(order.getPrice());
-        binding.tvDetailStatus.setText(order.getStatus());
-        binding.selectaddress.setText(order.getAddress().isEmpty() ? "No address selected yet" : "📍 " + order.getAddress());
+        // Convert dishes list to readable string
+        StringBuilder itemsBuilder = new StringBuilder();
+        if (order.getDishes() != null) {
+            for (OrderModel.ResultsBean.DishesBean dish : order.getDishes()) {
+                if (itemsBuilder.length() > 0) itemsBuilder.append(", ");
+                itemsBuilder.append(dish.getPrice());
+            }
+        }
     }
 
     // ✅ Open Google Map to select delivery location
     private void openMapForSelectedOrder() {
-        binding.layoutOrderDetail.setVisibility(View.GONE);
         binding.layoutOrderList.setVisibility(View.GONE);
         binding.layoutMapTracking.setVisibility(View.VISIBLE);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragment);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(googleMap -> {
-                LatLng defaultLocation = new LatLng(19.0760, 72.8777);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 13f));
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.mapFragmentContainer);
 
-                if (selectedMarker != null) selectedMarker.remove();
-                selectedMarker = googleMap.addMarker(new MarkerOptions().position(defaultLocation).title("Tap to select"));
-
-                googleMap.setOnMapClickListener(latLng -> {
-                    if (selectedMarker != null) selectedMarker.remove();
-                    selectedMarker = googleMap.addMarker(new MarkerOptions().position(latLng).title("Delivery Location"));
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
-
-                    selectedLatLng = latLng;
-                    selectedAddress = getAddressFromLatLng(latLng);
-                    binding.tvMapSelectedAddress.setText(selectedAddress == null ? "Address not found" : "📍 " + selectedAddress);
-                });
-            });
+        if (mapFragment == null) {
+            mapFragment = SupportMapFragment.newInstance();
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.mapFragmentContainer, mapFragment)
+                    .commitNow(); // Important: attach immediately
         }
+
+        mapFragment.getMapAsync(googleMap -> {
+            LatLng defaultLocation = new LatLng(19.0760, 72.8777);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 13f));
+
+            if (selectedMarker != null) selectedMarker.remove();
+            selectedMarker = googleMap.addMarker(
+                    new MarkerOptions().position(defaultLocation).title("Tap to select")
+            );
+
+            googleMap.setOnMapClickListener(latLng -> {
+                if (selectedMarker != null) selectedMarker.remove();
+                selectedMarker = googleMap.addMarker(
+                        new MarkerOptions().position(latLng).title("Delivery Location")
+                );
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+
+                selectedLatLng = latLng;
+                selectedAddress = getAddressFromLatLng(latLng);
+                binding.tvMapSelectedAddress.setText(
+                        selectedAddress == null ? "Address not found" : "📍 " + selectedAddress
+                );
+            });
+        });
     }
+
+
 
     // ✅ Convert lat/lng → readable address
     private String getAddressFromLatLng(LatLng latLng) {

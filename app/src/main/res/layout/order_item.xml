@@ -7,18 +7,27 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp"
-        android:background="@drawable/order_item_bg"
         android:layout_margin="8dp"
-        android:elevation="2dp">
+        android:background="@drawable/order_item_bg"
+        android:elevation="2dp"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/restaurantName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restaurant Name"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:textStyle="bold" />
 
         <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvorderId"
@@ -26,106 +35,203 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Order #101"
-                android:textStyle="bold"
+                android:textColor="#000000"
                 android:textSize="15sp"
-                android:textColor="#000000" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pickup Pending"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:textSize="12sp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/status_pending_bg"
+                android:paddingLeft="10dp"
+                android:paddingTop="4dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="4dp"
+                android:text="Pickup Pending"
                 android:textColor="#FFFFFF"
-                android:layout_marginEnd="8dp" />
+                android:textSize="12sp" />
 
             <ImageView
                 android:id="@+id/ivexpandIcon"
-                android:layout_width="22dp"
+                android:layout_width="12dp"
                 android:layout_height="22dp"
                 android:src="@drawable/spinner"
-                app:tint="#888888" />
+                app:tint="@color/black" />
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginVertical="5dp"
+            android:backgroundTint="@color/black" />
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:gravity="center_vertical"
+            android:text="User Name"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:drawableEndCompat="@drawable/call2"
+            app:drawableStartCompat="@drawable/user2" />
 
         <!-- Expanded details (hidden by default) -->
         <LinearLayout
             android:id="@+id/layoutdetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_grey"
             android:orientation="vertical"
-            android:visibility="gone"
-            android:paddingTop="8dp">
+            android:padding="8dp">
 
             <TextView
-                android:id="@+id/tvcustomerName"
-                android:layout_width="wrap_content"
+                android:id="@+id/pickupCenter"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pizza Center"
-                android:textStyle="bold"
-                android:textColor="#000000" />
+                android:drawableStart="@drawable/call2"
+                android:drawableEnd="@drawable/ic_location"
+                android:drawablePadding="5dp"
+                android:drawableTint="@color/lightpink"
+                android:text="Pickup Center -1"
+                android:textColor="#000000"
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvItems"
+                android:id="@+id/tvAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2 x Pizza, 1 x Coke"
-                android:textColor="#555555" />
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="5dp"
+                android:drawableTint="@color/lightpink"
+                android:text="Restaurant Address"
+                android:textColor="#444444" />
 
-            <TextView
-                android:id="@+id/tvprice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="₹250"
-                android:layout_marginTop="6dp"
-                android:textStyle="bold"
-                android:textColor="#4CAF50" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:id="@+id/itemsContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="6dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_location"
-                    app:tint="#757575"
-                    android:layout_marginEnd="4dp" />
-
-                <TextView
-                    android:id="@+id/tvAddress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Address"
-                    android:textColor="#444444" />
+                android:orientation="vertical"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
             </LinearLayout>
 
-            <!-- NEW: Pickup Location -->
+        </LinearLayout>
+
+        <!-- NEW: Pickup Location -->
+        <TextView
+            android:id="@+id/tvPickupLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:text="pickup location"
+            android:textColor="@color/black"
+            android:textSize="13sp"
+            android:drawableStart="@drawable/ic_location"
+            android:drawableTint="@color/lightpink"/>
+
+        <!-- Payment & Total -->
+        <RelativeLayout
+            android:id="@+id/paymentView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
             <TextView
-                android:id="@+id/tvPickupLocation"
+                android:id="@+id/tvTotalPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pickup: 19.076, 72.877"
-                android:textColor="#555555"
-                android:layout_marginTop="4dp" />
+                android:text="₹2300"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:layout_alignParentStart="true"/>
+
+            <TextView
+                android:id="@+id/tvPaymentStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Paid"
+                android:textColor="#388E3C"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+
+        <!-- Delivery Info -->
+        <LinearLayout
+            android:id="@+id/deliveryInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/selectedAddress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Delivery Pickup By Tomorrow\n5:30 PM, Thu, 25/08/2023"
+                android:textColor="#000"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvTimeLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏰ 1:04 Hrs"
+                android:textColor="#E57373"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvSelectOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select an Option"
+            android:padding="12dp"
+            android:background="@drawable/bg_edittext"
+            android:drawableEnd="@drawable/spinner"
+            android:focusable="true"
+            android:clickable="true" />
+
+        <LinearLayout
+            android:id="@+id/pickupView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/btnConfirmPickup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Confirm Pickup"
-                android:textColor="#FFFFFF"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/btn_red_rounded"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="8dp"
+                android:text="Confirm Pickup"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/btnCancelPickup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/btn_red_rounded" />
+                android:background="@drawable/btn_red_rounded"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
+                android:text="Cancel Pickup"
+                android:textColor="#FFFFFF" />
         </LinearLayout>
     </LinearLayout>
 </layout>

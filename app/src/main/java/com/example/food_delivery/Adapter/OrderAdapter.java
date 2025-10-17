@@ -3,7 +3,9 @@ package com.example.food_delivery.Adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,15 +18,16 @@ import java.util.List;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
     public interface OnOrderActionListener {
-        void onConfirmPickup(OrderModel order);    // User pressed Confirm Pickup
-        void onItemToggle(OrderModel order);       // Item header clicked to expand/collapse
+        void onConfirmPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
+
+        void onItemToggle(OrderModel.ResultsBean order);       // Item header clicked to expand/collapse
     }
 
     private final Context context;
-    private final List<OrderModel> orders;
+    private final List<OrderModel.ResultsBean> orders;
     private final OnOrderActionListener listener;
 
-    public OrderAdapter(Context context, List<OrderModel> orders, OnOrderActionListener listener) {
+    public OrderAdapter(Context context, List<OrderModel.ResultsBean> orders, OnOrderActionListener listener) {
         this.context = context;
         this.orders = orders;
         this.listener = listener;
@@ -39,15 +42,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
-        OrderModel order = orders.get(position); // ✅ get current order
+        OrderModel.ResultsBean order = orders.get(position); // ✅ get current order
         holder.bind(order);
 
-        // ✅ Highlight new orders
+       /* // ✅ Highlight new orders
         if (order.isNew()) {
             holder.itemView.setBackgroundColor(Color.parseColor("#FFF9C4")); // Light yellow
         } else {
             holder.itemView.setBackgroundColor(Color.WHITE);
-        }
+        }*/
     }
 
     @Override
@@ -63,37 +66,104 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             this.b = binding;
         }
 
-        public void bind(final OrderModel order) {
+        public void bind(final OrderModel.ResultsBean order) {
+            // ✅ Basic info
+            b.restaurantName.setText(order.getRestaurantData().getName());
             b.tvorderId.setText("Order No. #" + order.getOrderId());
-            b.tvcustomerName.setText(order.getCustomerName());
-            b.tvItems.setText(order.getItems());
-            b.tvprice.setText(order.getPrice());
-            b.tvAddress.setText(order.getAddress().isEmpty() ? "No address selected yet" : "📍 " + order.getAddress());
+            b.tvUserName.setText(order.getUserData() != null ? order.getUserData().getFullName() : "Unknown");
+
+            // ✅ Dynamically add all dishes to the layout
+            b.itemsContainer.removeAllViews();
+
+            if (order.getDishes() != null && !order.getDishes().isEmpty()) {
+                for (OrderModel.ResultsBean.DishesBean dish : order.getDishes()) {
+                    View itemView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2, null, false);
+
+                    TextView text1 = itemView.findViewById(android.R.id.text1);
+                    TextView text2 = itemView.findViewById(android.R.id.text2);
+
+                    // Example fields - adjust based on your API model
+//                    String dishName = dish.getDishName(); // e.g. “Besan Ladoo”
+                    int qty = dish.getQuantity();              // e.g. 2
+                    int price = dish.getPrice();          // e.g. 500
+
+                    text1.setText("dishName" + "  (" + qty + "x)");
+                    text2.setText("₹" + price);
+                    text1.setTextColor(Color.BLACK);
+                    text2.setTextColor(Color.parseColor("#4CAF50"));
+
+                    b.itemsContainer.addView(itemView);
+                }
+            } else {
+                TextView empty = new TextView(context);
+                empty.setText("No items available");
+                empty.setTextColor(Color.GRAY);
+                b.itemsContainer.addView(empty);
+            }
+
+
+            // ✅ Price (convert int to string)
+            b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
+
+            // ✅ Address (city or full address)
+            if (order.getAddress() != null && order.getAddress().getCity() != null) {
+                b.tvAddress.setText("📍 " + order.getAddress().getCity());
+            } else {
+                b.tvAddress.setText("No address selected yet");
+            }
+
+            b.tvPickupLocation.setText(order.getRestaurantData().getAddress());
+
             b.tvStatus.setText(order.getStatus());
 
-            // Expand/collapse details
+            // ✅ Handle expanded/collapsed view
             boolean expanded = order.isExpanded();
-            b.layoutdetails.setVisibility(expanded ? android.view.View.VISIBLE : android.view.View.GONE);
-            b.ivexpandIcon.setRotation(expanded ? 180f : 0f);
+            b.tvUserName.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.layoutdetails.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.tvPickupLocation.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.paymentView.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.deliveryInfo.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.tvSelectOption.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.pickupView.setVisibility(expanded ? View.VISIBLE : View.GONE);
 
-            // Expand/collapse on icon click
-            b.ivexpandIcon.setOnClickListener(v -> {
-                order.setExpanded(!order.isExpanded());
-                notifyItemChanged(getAdapterPosition());
+            // Rotate arrow with animation for better UX
+            b.ivexpandIcon.animate().rotation(expanded ? 180f : 0f).setDuration(200).start();
+
+            // ✅ Toggle expand/collapse
+            View.OnClickListener toggleListener = v -> {
+                boolean newExpandedState = !order.isExpanded();
+
+                // Optional: collapse other items (only one expanded at a time)
+                for (OrderModel.ResultsBean o : orders) {
+                    o.setExpanded(false);
+                }
+
+                order.setExpanded(newExpandedState);
+                notifyDataSetChanged(); // refresh all items
+
                 if (listener != null) listener.onItemToggle(order);
-            });
+            };
 
-            // Expand/collapse on item click
-            b.getRoot().setOnClickListener(v -> {
-                order.setExpanded(!order.isExpanded());
-                notifyItemChanged(getAdapterPosition());
-                if (listener != null) listener.onItemToggle(order);
-            });
+            b.ivexpandIcon.setOnClickListener(toggleListener);
+            b.getRoot().setOnClickListener(toggleListener);
 
-            // Confirm Pickup button
+            // ✅ Confirm Pickup button
             b.btnConfirmPickup.setOnClickListener(v -> {
                 if (listener != null) listener.onConfirmPickup(order);
             });
+
+            // ✅ Show "Select an Option" dialog
+            b.tvSelectOption.setOnClickListener(v -> {
+                String[] options = {"Pickup", "Delivered"};
+                new android.app.AlertDialog.Builder(context)
+                        .setTitle("Choose an option")
+                        .setItems(options, (dialog, which) -> {
+                            String selected = options[which];
+                            b.tvSelectOption.setText(selected);
+                        })
+                        .show();
+            });
+
         }
     }
 }
