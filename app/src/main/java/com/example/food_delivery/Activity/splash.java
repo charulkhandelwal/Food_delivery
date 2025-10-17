@@ -3,6 +3,7 @@ package com.example.food_delivery.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,6 +24,7 @@ public class splash extends AppCompatActivity {
     }
 
     private void checkNextScreen() {
+        Log.e("tannu", "bhbvghjdfg");
         String token = DocumentPrefs.getToken(this);
 
         if (token == null || token.isEmpty()) {
