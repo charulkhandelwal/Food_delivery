@@ -29,7 +29,7 @@ public class personal_Document extends AppCompatActivity {
 
         binding.ivBack.setOnClickListener(v -> finish());
 
-        // Navigation to document upload screens
+
         binding.cardAadhaar.setOnClickListener(v -> startActivity(new Intent(this, Aadharcard_Activity.class)));
         binding.cardPan.setOnClickListener(v -> startActivity(new Intent(this, PANCARD_Activity.class)));
         binding.cardDL.setOnClickListener(v -> startActivity(new Intent(this, DriverLicense_Activity.class)));
@@ -44,7 +44,7 @@ public class personal_Document extends AppCompatActivity {
             }
 
             if (hasAadhaar && hasPan && hasDl) {
-                // ✅ Add a single "aadhaar", "pan", and "dl" marker entries
+
                 updateDocumentStatus("aadhaar");
                 updateDocumentStatus("pan");
                 updateDocumentStatus("dl");
@@ -68,7 +68,7 @@ public class personal_Document extends AppCompatActivity {
         }
         if (!exists) {
             DocumentModel doc = new DocumentModel(type, type.toUpperCase());
-            doc.setImageUri("saved"); // just a placeholder marker
+            doc.setImageUri("saved");
             documentList.add(doc);
         }
         DocumentPrefs.saveDocumentList(this, documentList);

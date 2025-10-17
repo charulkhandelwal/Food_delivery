@@ -51,7 +51,7 @@ public class Personal_informationActivity extends AppCompatActivity {
     private Bitmap selectedProfileImage = null;
     private JSONArray citiesArray;
 
-    // ✅ Valid blood group list
+
     private final List<String> validBloodGroups = Arrays.asList(
             "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"
     );
@@ -60,7 +60,7 @@ public class Personal_informationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ✅ If profile already saved, skip this screen
+
         if (DocumentPrefs.getProfile(this) != null) {
             startActivity(new Intent(this, Document_Activity.class));
             finish();
@@ -74,7 +74,7 @@ public class Personal_informationActivity extends AppCompatActivity {
         binding.btnUpload.setOnClickListener(v -> showImagePicker());
         binding.btnSubmit.setOnClickListener(v -> submitProfileMultipart());
 
-        loadCitiesData(); // Load cities from JSON
+        loadCitiesData();
     }
 
     private void loadCitiesData() {
@@ -120,7 +120,7 @@ public class Personal_informationActivity extends AppCompatActivity {
         if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); return; }
         if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); return; }
 
-        // ✅ Blood group validation
+
         if (bloodGroupStr.isEmpty()) {
             binding.etBloodGroup.setError("Blood group required");
             return;
@@ -136,7 +136,7 @@ public class Personal_informationActivity extends AppCompatActivity {
         Log.d("PROFILE_DEBUG", "firstName: " + firstNameStr);
         Log.d("PROFILE_DEBUG", "bloodGroup: " + bloodGroupStr);
 
-        // Prepare request bodies
+
         RequestBody firstName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), firstNameStr);
         RequestBody lastName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), lastNameStr);
         RequestBody fatherName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), fatherNameStr);
@@ -171,14 +171,14 @@ public class Personal_informationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // ✅ Save profile locally to skip next time
+
                     String profileJson = new Gson().toJson(response.body());
                     DocumentPrefs.saveProfile(Personal_informationActivity.this, profileJson);
 
                     Toast.makeText(Personal_informationActivity.this,
                             "Profile updated successfully!", Toast.LENGTH_SHORT).show();
 
-                    // Move to Document upload
+
                     startActivity(new Intent(Personal_informationActivity.this, Document_Activity.class));
                     finish();
                 } else {

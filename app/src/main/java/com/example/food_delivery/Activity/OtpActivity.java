@@ -29,7 +29,7 @@ public class OtpActivity extends AppCompatActivity {
 
     private ActivityOtpBinding binding;
     private String phone;
-    private String countryCode = "+91"; // default value
+    private String countryCode = "+91";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,23 +37,22 @@ public class OtpActivity extends AppCompatActivity {
         binding = ActivityOtpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // 🔹 Get phone number and country code from intent
+
         phone = getIntent().getStringExtra("mobile");
         String codeFromIntent = getIntent().getStringExtra("countryCode");
-
         if (codeFromIntent != null && !codeFromIntent.isEmpty()) {
             countryCode = codeFromIntent;
         }
 
         Log.e("OTP_ACTIVITY", "📞 Phone: " + phone + " | CountryCode: " + countryCode);
 
-        // 🔹 Back button
+
         binding.BtnBack.setOnClickListener(v -> onBackPressed());
 
-        // 🔹 Setup OTP inputs
+
         setupOtpInputs();
 
-        // 🔹 Verify OTP button click
+
         binding.btnverify.setOnClickListener(v -> {
             String otp = getOtpFromInputs();
             if (otp.length() != 6) {
@@ -64,7 +63,6 @@ public class OtpActivity extends AppCompatActivity {
         });
     }
 
-    // 🔹 Handles auto movement between OTP boxes
     private void setupOtpInputs() {
         EditText[] otpInputs = {
                 binding.etOtp1, binding.etOtp2, binding.etOtp3,
@@ -74,9 +72,7 @@ public class OtpActivity extends AppCompatActivity {
         for (int i = 0; i < otpInputs.length; i++) {
             int index = i;
             otpInputs[index].addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (s.length() == 1 && index < otpInputs.length - 1) {
@@ -85,14 +81,12 @@ public class OtpActivity extends AppCompatActivity {
                         otpInputs[index - 1].requestFocus();
                     }
                 }
-
-                @Override
-                public void afterTextChanged(Editable s) {}
+                @Override public void afterTextChanged(Editable s) {}
             });
         }
     }
 
-    // 🔹 Collects all 6 digits of the OTP
+
     private String getOtpFromInputs() {
         return binding.etOtp1.getText().toString().trim() +
                 binding.etOtp2.getText().toString().trim() +
@@ -102,7 +96,7 @@ public class OtpActivity extends AppCompatActivity {
                 binding.etOtp6.getText().toString().trim();
     }
 
-    // 🔹 API Call for OTP Verification
+
     private void verifyOtpApi(String phone, String otp, String countryCode) {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
 
@@ -125,21 +119,31 @@ public class OtpActivity extends AppCompatActivity {
 
                         String token = otpResponse.results.token;
                         String partnerId = otpResponse.results.partner.id;
+                        boolean isNewUser = otpResponse.results.isNewUser;
 
-                        // 🔹 Save token & partnerId
+
                         DocumentPrefs.saveToken(OtpActivity.this, token);
                         DocumentPrefs.savePartnerId(OtpActivity.this, partnerId);
 
                         Log.e("TOKEN_SAVED", token);
                         Log.e("PARTNER_ID_SAVED", partnerId);
+                        Log.e("IS_NEW_USER", "isNewUser: " + isNewUser);
 
-                        // 🔹 Connect Socket and Emit Event
+
                         connectSocket(partnerId);
 
                         Toast.makeText(OtpActivity.this, "OTP Verified Successfully", Toast.LENGTH_SHORT).show();
 
-                        // 🔹 Go to next screen
-                        Intent intent = new Intent(OtpActivity.this, Personal_informationActivity.class);
+
+                        Intent intent;
+                        if (isNewUser) {
+
+                            intent = new Intent(OtpActivity.this, Personal_informationActivity.class);
+                        } else {
+
+                            intent = new Intent(OtpActivity.this, MainActivity.class);
+                        }
+
                         startActivity(intent);
                         finish();
 
@@ -161,7 +165,7 @@ public class OtpActivity extends AppCompatActivity {
         });
     }
 
-    // 🔹 Handles socket connection and partner_online emission
+
     private void connectSocket(String partnerId) {
         try {
             SocketManager socketManager = SocketManager.getInstance();
