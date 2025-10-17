@@ -27,7 +27,7 @@ public class splash extends AppCompatActivity {
 
         if (token == null || token.isEmpty()) {
             // 🔹 User not logged in → OTP screen
-            startActivity(new Intent(this, OtpActivity.class));
+            startActivity(new Intent(this, Sign_up.class));
         } else {
             // 🔹 Already logged in → MainActivity
             startActivity(new Intent(this, MainActivity.class));
