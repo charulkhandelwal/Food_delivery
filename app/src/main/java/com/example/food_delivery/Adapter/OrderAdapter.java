@@ -70,7 +70,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             // ✅ Basic info
             b.restaurantName.setText(order.getRestaurantData().getName());
             b.tvorderId.setText("Order No. #" + order.getOrderId());
-            b.tvUserName.setText(order.getUserData() != null ? order.getUserData().getFullName() : "Unknown");
+            b.tvUserName.setText(order.getUserData() != null && order.getUserData().getFullName() != null
+                    ? order.getUserData().getFullName()
+                    : "Unknown");
+
 
             // ✅ Dynamically add all dishes to the layout
             b.itemsContainer.removeAllViews();
@@ -83,11 +86,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     TextView text2 = itemView.findViewById(android.R.id.text2);
 
                     // Example fields - adjust based on your API model
-//                    String dishName = dish.getDishName(); // e.g. “Besan Ladoo”
+                    String dishName = dish.getName(); // e.g. “Besan Ladoo”
                     int qty = dish.getQuantity();              // e.g. 2
                     int price = dish.getPrice();          // e.g. 500
 
-                    text1.setText("dishName" + "  (" + qty + "x)");
+                    text1.setText(dishName + "  (" + qty + "x)");
                     text2.setText("₹" + price);
                     text1.setTextColor(Color.BLACK);
                     text2.setTextColor(Color.parseColor("#4CAF50"));
@@ -106,14 +109,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
 
             // ✅ Address (city or full address)
-            if (order.getAddress() != null && order.getAddress().getCity() != null) {
-                b.tvAddress.setText("📍 " + order.getAddress().getCity());
+            if (order.getRestaurantData().getAddress() != null && order.getRestaurantData().getAddress().isEmpty()) {
+                b.tvAddress.setText("📍 " + order.getRestaurantData().getAddress());
             } else {
                 b.tvAddress.setText("No address selected yet");
             }
 
-            b.tvPickupLocation.setText(order.getRestaurantData().getAddress());
-
+//            b.tvPickupLocation.setText(order.getUserData().getAddresses());
+//
             b.tvStatus.setText(order.getStatus());
 
             // ✅ Handle expanded/collapsed view

@@ -1,5 +1,6 @@
 package com.example.food_delivery.Model;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class OrderModel {
@@ -25,9 +26,8 @@ public class OrderModel {
         private int totalPrice;
         private Object discountId;
         private int discountAmount;
-        private String finalPrice;
+        private int finalPrice;
         private AddressBean address;
-        private String addressId;
         private String orderId;
         private String status;
         private String paymentStatus;
@@ -37,27 +37,18 @@ public class OrderModel {
         private String updatedAt;
         private int __v;
         private RestaurantDataBean restaurantData;
-        private UserDataBean userData;
         private List<DishesBean> dishes;
+        private UserData userData;
 
-        // ✅ Local field (not part of API)
+        // ✅ Local fields
         private transient boolean isNew = true;
         private transient boolean isExpanded = false;
 
-        public boolean isNew() {
-            return isNew;
-        }
+        public boolean isNew() { return isNew; }
+        public void setNew(boolean isNew) { this.isNew = isNew; }
 
-        public void setNew(boolean isNew) {
-            this.isNew = isNew;
-        }
-        public boolean isExpanded() {
-            return isExpanded;
-        }
-
-        public void setExpanded(boolean expanded) {
-            this.isExpanded = expanded;
-        }
+        public boolean isExpanded() { return isExpanded; }
+        public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
 
         public String get_id() { return _id; }
         public void set_id(String _id) { this._id = _id; }
@@ -80,14 +71,11 @@ public class OrderModel {
         public int getDiscountAmount() { return discountAmount; }
         public void setDiscountAmount(int discountAmount) { this.discountAmount = discountAmount; }
 
-        public String getFinalPrice() { return finalPrice; }
-        public void setFinalPrice(String finalPrice) { this.finalPrice = finalPrice; }
+        public int getFinalPrice() { return finalPrice; }
+        public void setFinalPrice(int finalPrice) { this.finalPrice = finalPrice; }
 
         public AddressBean getAddress() { return address; }
         public void setAddress(AddressBean address) { this.address = address; }
-
-        public String getAddressId() { return addressId; }
-        public void setAddressId(String addressId) { this.addressId = addressId; }
 
         public String getOrderId() { return orderId; }
         public void setOrderId(String orderId) { this.orderId = orderId; }
@@ -116,8 +104,8 @@ public class OrderModel {
         public RestaurantDataBean getRestaurantData() { return restaurantData; }
         public void setRestaurantData(RestaurantDataBean restaurantData) { this.restaurantData = restaurantData; }
 
-        public UserDataBean getUserData() { return userData; }
-        public void setUserData(UserDataBean userData) { this.userData = userData; }
+        public UserData getUserData() { return userData; }
+        public void setUserData(UserData userData) { this.userData = userData; }
 
         public List<DishesBean> getDishes() { return dishes; }
         public void setDishes(List<DishesBean> dishes) { this.dishes = dishes; }
@@ -143,7 +131,7 @@ public class OrderModel {
             private String currency;
             private String status;
             private String payment_method;
-            private int created;
+            private long created;
 
             public String getId() { return id; }
             public void setId(String id) { this.id = id; }
@@ -160,8 +148,8 @@ public class OrderModel {
             public String getPayment_method() { return payment_method; }
             public void setPayment_method(String payment_method) { this.payment_method = payment_method; }
 
-            public int getCreated() { return created; }
-            public void setCreated(int created) { this.created = created; }
+            public long getCreated() { return created; }
+            public void setCreated(long created) { this.created = created; }
         }
 
         public static class RestaurantDataBean {
@@ -175,26 +163,6 @@ public class OrderModel {
             private String ownerFirstName;
             private String ownerFullName;
             private String phone;
-            private String fssaiLicenseNumber;
-            private String tinNumber;
-            private String email;
-            private String password;
-            private String status;
-            private String registrationStatus;
-            private String deviceId;
-            private String deviceType;
-            private String deviceToken;
-            private boolean notifications;
-            private boolean forceLogout;
-            private String countryCode;
-            private String rejectionReason;
-            private boolean isEmailVerified;
-            private boolean isMobileVerified;
-            private String role;
-            private String createdAt;
-            private String updatedAt;
-            private int __v;
-            private String restaurantLogo;
             private List<String> cuisine;
             private List<String> tags;
 
@@ -228,66 +196,6 @@ public class OrderModel {
             public String getPhone() { return phone; }
             public void setPhone(String phone) { this.phone = phone; }
 
-            public String getFssaiLicenseNumber() { return fssaiLicenseNumber; }
-            public void setFssaiLicenseNumber(String fssaiLicenseNumber) { this.fssaiLicenseNumber = fssaiLicenseNumber; }
-
-            public String getTinNumber() { return tinNumber; }
-            public void setTinNumber(String tinNumber) { this.tinNumber = tinNumber; }
-
-            public String getEmail() { return email; }
-            public void setEmail(String email) { this.email = email; }
-
-            public String getPassword() { return password; }
-            public void setPassword(String password) { this.password = password; }
-
-            public String getStatus() { return status; }
-            public void setStatus(String status) { this.status = status; }
-
-            public String getRegistrationStatus() { return registrationStatus; }
-            public void setRegistrationStatus(String registrationStatus) { this.registrationStatus = registrationStatus; }
-
-            public String getDeviceId() { return deviceId; }
-            public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
-
-            public String getDeviceType() { return deviceType; }
-            public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
-
-            public String getDeviceToken() { return deviceToken; }
-            public void setDeviceToken(String deviceToken) { this.deviceToken = deviceToken; }
-
-            public boolean isNotifications() { return notifications; }
-            public void setNotifications(boolean notifications) { this.notifications = notifications; }
-
-            public boolean isForceLogout() { return forceLogout; }
-            public void setForceLogout(boolean forceLogout) { this.forceLogout = forceLogout; }
-
-            public String getCountryCode() { return countryCode; }
-            public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
-
-            public String getRejectionReason() { return rejectionReason; }
-            public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
-
-            public boolean isIsEmailVerified() { return isEmailVerified; }
-            public void setIsEmailVerified(boolean isEmailVerified) { this.isEmailVerified = isEmailVerified; }
-
-            public boolean isIsMobileVerified() { return isMobileVerified; }
-            public void setIsMobileVerified(boolean isMobileVerified) { this.isMobileVerified = isMobileVerified; }
-
-            public String getRole() { return role; }
-            public void setRole(String role) { this.role = role; }
-
-            public String getCreatedAt() { return createdAt; }
-            public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-
-            public String getUpdatedAt() { return updatedAt; }
-            public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
-
-            public int get__v() { return __v; }
-            public void set__v(int __v) { this.__v = __v; }
-
-            public String getRestaurantLogo() { return restaurantLogo; }
-            public void setRestaurantLogo(String restaurantLogo) { this.restaurantLogo = restaurantLogo; }
-
             public List<String> getCuisine() { return cuisine; }
             public void setCuisine(List<String> cuisine) { this.cuisine = cuisine; }
 
@@ -306,7 +214,34 @@ public class OrderModel {
             }
         }
 
-        public static class UserDataBean {
+        public static class DishesBean {
+            private String _id;
+            private String dishId;
+            private int quantity;
+            private int price;
+            private String specialInstructions;
+            private String name;
+
+            public String get_id() { return _id; }
+            public void set_id(String _id) { this._id = _id; }
+
+            public String getDishId() { return dishId; }
+            public void setDishId(String dishId) { this.dishId = dishId; }
+
+            public int getQuantity() { return quantity; }
+            public void setQuantity(int quantity) { this.quantity = quantity; }
+
+            public int getPrice() { return price; }
+            public void setPrice(int price) { this.price = price; }
+
+            public String getSpecialInstructions() { return specialInstructions; }
+            public void setSpecialInstructions(String specialInstructions) { this.specialInstructions = specialInstructions; }
+
+            public String getName() { return name; }
+            public void setName(String name) { this.name = name; }
+        }
+
+        public static class UserData implements Serializable {
             private String _id;
             private String firstName;
             private String lastName;
@@ -316,26 +251,22 @@ public class OrderModel {
             private String role;
             private boolean isMobileVerified;
             private boolean isEmailVerified;
-            private boolean newUserVerified;
             private String status;
             private boolean isDeleted;
-            private Object deviceId;
-            private Object deviceType;
-            private Object deviceToken;
+            private String deviceId;
+            private String deviceType;
+            private String deviceToken;
             private String registrationType;
             private Object rating;
             private Object socialId;
             private boolean notifications;
             private boolean forceLogout;
+            private List<Object> addresses;
             private String createdAt;
             private String updatedAt;
             private int __v;
-            private String gender;
-            private String profilePic;
-            private String dob;
-            private String countryCode;
-            private List<AddressesBean> addresses;
 
+            // Getters and Setters
             public String get_id() { return _id; }
             public void set_id(String _id) { this._id = _id; }
 
@@ -357,29 +288,26 @@ public class OrderModel {
             public String getRole() { return role; }
             public void setRole(String role) { this.role = role; }
 
-            public boolean isIsMobileVerified() { return isMobileVerified; }
-            public void setIsMobileVerified(boolean isMobileVerified) { this.isMobileVerified = isMobileVerified; }
+            public boolean isMobileVerified() { return isMobileVerified; }
+            public void setMobileVerified(boolean mobileVerified) { isMobileVerified = mobileVerified; }
 
-            public boolean isIsEmailVerified() { return isEmailVerified; }
-            public void setIsEmailVerified(boolean isEmailVerified) { this.isEmailVerified = isEmailVerified; }
-
-            public boolean isNewUserVerified() { return newUserVerified; }
-            public void setNewUserVerified(boolean newUserVerified) { this.newUserVerified = newUserVerified; }
+            public boolean isEmailVerified() { return isEmailVerified; }
+            public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
 
             public String getStatus() { return status; }
             public void setStatus(String status) { this.status = status; }
 
-            public boolean isIsDeleted() { return isDeleted; }
-            public void setIsDeleted(boolean isDeleted) { this.isDeleted = isDeleted; }
+            public boolean isDeleted() { return isDeleted; }
+            public void setDeleted(boolean deleted) { isDeleted = deleted; }
 
-            public Object getDeviceId() { return deviceId; }
-            public void setDeviceId(Object deviceId) { this.deviceId = deviceId; }
+            public String getDeviceId() { return deviceId; }
+            public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
-            public Object getDeviceType() { return deviceType; }
-            public void setDeviceType(Object deviceType) { this.deviceType = deviceType; }
+            public String getDeviceType() { return deviceType; }
+            public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
 
-            public Object getDeviceToken() { return deviceToken; }
-            public void setDeviceToken(Object deviceToken) { this.deviceToken = deviceToken; }
+            public String getDeviceToken() { return deviceToken; }
+            public void setDeviceToken(String deviceToken) { this.deviceToken = deviceToken; }
 
             public String getRegistrationType() { return registrationType; }
             public void setRegistrationType(String registrationType) { this.registrationType = registrationType; }
@@ -396,6 +324,9 @@ public class OrderModel {
             public boolean isForceLogout() { return forceLogout; }
             public void setForceLogout(boolean forceLogout) { this.forceLogout = forceLogout; }
 
+            public List<Object> getAddresses() { return addresses; }
+            public void setAddresses(List<Object> addresses) { this.addresses = addresses; }
+
             public String getCreatedAt() { return createdAt; }
             public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
@@ -404,104 +335,7 @@ public class OrderModel {
 
             public int get__v() { return __v; }
             public void set__v(int __v) { this.__v = __v; }
-
-            public String getGender() { return gender; }
-            public void setGender(String gender) { this.gender = gender; }
-
-            public String getProfilePic() { return profilePic; }
-            public void setProfilePic(String profilePic) { this.profilePic = profilePic; }
-
-            public String getDob() { return dob; }
-            public void setDob(String dob) { this.dob = dob; }
-
-            public String getCountryCode() { return countryCode; }
-            public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
-
-            public List<AddressesBean> getAddresses() { return addresses; }
-            public void setAddresses(List<AddressesBean> addresses) { this.addresses = addresses; }
-
-            public static class AddressesBean {
-                private String _id;
-                private String street;
-                private String city;
-                private String state;
-                private String country;
-                private String zipCode;
-                private LocationObjectBean locationObject;
-                private String completeAddress;
-                private boolean defaultAddress;
-                private String createdAt;
-                private String updatedAt;
-
-                public String get_id() { return _id; }
-                public void set_id(String _id) { this._id = _id; }
-
-                public String getStreet() { return street; }
-                public void setStreet(String street) { this.street = street; }
-
-                public String getCity() { return city; }
-                public void setCity(String city) { this.city = city; }
-
-                public String getState() { return state; }
-                public void setState(String state) { this.state = state; }
-
-                public String getCountry() { return country; }
-                public void setCountry(String country) { this.country = country; }
-
-                public String getZipCode() { return zipCode; }
-                public void setZipCode(String zipCode) { this.zipCode = zipCode; }
-
-                public LocationObjectBean getLocationObject() { return locationObject; }
-                public void setLocationObject(LocationObjectBean locationObject) { this.locationObject = locationObject; }
-
-                public String getCompleteAddress() { return completeAddress; }
-                public void setCompleteAddress(String completeAddress) { this.completeAddress = completeAddress; }
-
-                public boolean isDefaultAddress() { return defaultAddress; }
-                public void setDefaultAddress(boolean defaultAddress) { this.defaultAddress = defaultAddress; }
-
-                public String getCreatedAt() { return createdAt; }
-                public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-
-                public String getUpdatedAt() { return updatedAt; }
-                public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
-
-                public static class LocationObjectBean {
-                    private String type;
-                    private List<Double> coordinates;
-
-                    public String getType() { return type; }
-                    public void setType(String type) { this.type = type; }
-
-                    public List<Double> getCoordinates() { return coordinates; }
-                    public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
-                }
-            }
         }
-
-        public static class DishesBean {
-            private String _id;
-            private String dishId;
-            private int quantity;
-            private int price;
-            private String specialInstructions;
-
-            public String get_id() { return _id; }
-            public void set_id(String _id) { this._id = _id; }
-
-            public String getDishId() { return dishId; }
-            public void setDishId(String dishId) { this.dishId = dishId; }
-
-            public int getQuantity() { return quantity; }
-            public void setQuantity(int quantity) { this.quantity = quantity; }
-
-            public int getPrice() { return price; }
-            public void setPrice(int price) { this.price = price; }
-
-            public String getSpecialInstructions() { return specialInstructions; }
-            public void setSpecialInstructions(String specialInstructions) { this.specialInstructions = specialInstructions; }
-        }
-
 
     }
 }

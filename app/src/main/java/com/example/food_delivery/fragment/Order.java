@@ -180,7 +180,7 @@ public class Order extends Fragment {
                     OrderModel.ResultsBean newOrder = new OrderModel.ResultsBean();
                     newOrder.setOrderId(obj.optString("orderId", ""));
                     newOrder.setStatus("Pending");
-                    newOrder.setNew(true); // mark as new (for highlight, etc.)
+//                    newOrder.setNew(true); // mark as new (for highlight, etc.)
 
                     // Restaurant info
                     JSONObject restaurantObj = obj.optJSONObject("restaurantId");
@@ -243,7 +243,7 @@ public class Order extends Fragment {
             @Override
             public void onConfirmPickup(OrderModel.ResultsBean order) {
                 selectedOrder = order;
-                order.setNew(false);
+//                order.setNew(false);
                 adapter.notifyDataSetChanged();
                 if (selectedOrder != null) openMapForSelectedOrder();
                 else
