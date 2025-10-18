@@ -43,6 +43,7 @@
                     android:src="@drawable/logoorder" />
 
                 <TextView
+                    android:id="@+id/nodata"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"

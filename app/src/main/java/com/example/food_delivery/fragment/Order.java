@@ -121,11 +121,24 @@ public class Order extends Fragment {
                     setupAdapter();
                 }
                 else {
-                    // 👇 Add these lines before the toast
                     Log.e("API_RESPONSE_CODE", "Code: " + response.code());
                     try {
                         if (response.errorBody() != null) {
-                            Log.e("API_ERROR_BODY", response.errorBody().string());
+                            String errorBody = response.errorBody().string();
+                            Log.e("API_ERROR_BODY", errorBody);
+
+                            JSONObject jsonObject = new JSONObject(errorBody);
+                            String message = jsonObject.optString("message", "");
+
+                            if (message.equalsIgnoreCase("Admin have deactivated or deleted your account.")) {
+                                // 👉 Show custom message and hide order list
+                                binding.layoutOrderList.setVisibility(View.GONE);
+                                binding.layoutNoOrders.setVisibility(View.VISIBLE);
+                                binding.nodata.setText("Please wait for admin approval.");
+                            } else {
+                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                            }
+
                         } else if (response.body() != null) {
                             Log.e("API_RESPONSE_BODY", new Gson().toJson(response.body()));
                         } else {
@@ -134,8 +147,6 @@ public class Order extends Fragment {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    Toast.makeText(requireContext(), "Failed to fetch orders", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -146,24 +157,6 @@ public class Order extends Fragment {
             }
         });
     }
-
-    /*private final Emitter.Listener onNewOrderReceived = args -> {
-        if (getActivity() == null) return;
-
-        getActivity().runOnUiThread(() -> {
-            try {
-                // Check if any data is received
-                if (args.length > 0 && args[0] != null) {
-                    Log.d("SocketNewOrder", "✅ new_order data received!");
-                    Log.d("SocketNewOrder", "Raw Data → " + args[0].toString());
-                } else {
-                    Log.w("SocketNewOrder", "⚠️ new_order event triggered but no data received!");
-                }
-            } catch (Exception e) {
-                Log.e("SocketNewOrder", "❌ Error in new_order listener: " + e.getMessage());
-            }
-        });
-    };*/
 
     private final Emitter.Listener onNewOrderReceived = args -> {
         if (getActivity() == null) return;

@@ -2,6 +2,7 @@ package com.example.food_delivery.Adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,7 +116,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 b.tvAddress.setText("No address selected yet");
             }
 
-//            b.tvPickupLocation.setText(order.getUserData().getAddresses());
+            if (order.getUserData() != null && order.getUserData().getAddresses() != null && !order.getUserData().getAddresses().isEmpty()) {
+                b.tvPickupLocation.setText(order.getUserData().getAddresses().get(0).getCompleteAddress());
+            } else {
+                b.tvPickupLocation.setText("No address available");
+            }
+
+
 //
             b.tvStatus.setText(order.getStatus());
 
