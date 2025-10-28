@@ -18,9 +18,9 @@ import java.util.List;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
     public interface OnOrderActionListener {
-        void onConfirmPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
+        void onConfirmPickup(OrderModel.ResultsBean order);
 
-        void onItemToggle(OrderModel.ResultsBean order);       // Item header clicked to expand/collapse
+        void onItemToggle(OrderModel.ResultsBean order);
     }
 
     private final Context context;
@@ -42,7 +42,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
-        OrderModel.ResultsBean order = orders.get(position); // ✅ get current order
+        OrderModel.ResultsBean order = orders.get(position);
         holder.bind(order);
 
        /* // ✅ Highlight new orders
@@ -67,7 +67,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
 
         public void bind(final OrderModel.ResultsBean order) {
-            // ✅ Basic info
+
             b.restaurantName.setText(order.getRestaurantData().getName());
             b.tvorderId.setText("Order No. #" + order.getOrderId());
             b.tvUserName.setText(order.getUserData() != null && order.getUserData().getFullName() != null
@@ -75,7 +75,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     : "Unknown");
 
 
-            // ✅ Dynamically add all dishes to the layout
+
             b.itemsContainer.removeAllViews();
 
             if (order.getDishes() != null && !order.getDishes().isEmpty()) {
@@ -85,10 +85,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     TextView text1 = itemView.findViewById(android.R.id.text1);
                     TextView text2 = itemView.findViewById(android.R.id.text2);
 
-                    // Example fields - adjust based on your API model
-                    String dishName = dish.getName(); // e.g. “Besan Ladoo”
-                    int qty = dish.getQuantity();              // e.g. 2
-                    int price = dish.getPrice();          // e.g. 500
+
+                    String dishName = dish.getName();
+                    int qty = dish.getQuantity();
+                    int price = dish.getPrice();
 
                     text1.setText(dishName + "  (" + qty + "x)");
                     text2.setText("₹" + price);
@@ -105,21 +105,21 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
 
 
-            // ✅ Price (convert int to string)
+
             b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
 
-            // ✅ Address (city or full address)
+
             if (order.getRestaurantData().getAddress() != null && order.getRestaurantData().getAddress().isEmpty()) {
                 b.tvAddress.setText("📍 " + order.getRestaurantData().getAddress());
             } else {
                 b.tvAddress.setText("No address selected yet");
             }
 
-//            b.tvPickupLocation.setText(order.getUserData().getAddresses());
+//
 //
             b.tvStatus.setText(order.getStatus());
 
-            // ✅ Handle expanded/collapsed view
+
             boolean expanded = order.isExpanded();
             b.tvUserName.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.layoutdetails.setVisibility(expanded ? View.VISIBLE : View.GONE);
@@ -129,20 +129,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.tvSelectOption.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.pickupView.setVisibility(expanded ? View.VISIBLE : View.GONE);
 
-            // Rotate arrow with animation for better UX
+
             b.ivexpandIcon.animate().rotation(expanded ? 180f : 0f).setDuration(200).start();
 
-            // ✅ Toggle expand/collapse
+
             View.OnClickListener toggleListener = v -> {
                 boolean newExpandedState = !order.isExpanded();
 
-                // Optional: collapse other items (only one expanded at a time)
+
                 for (OrderModel.ResultsBean o : orders) {
                     o.setExpanded(false);
                 }
 
                 order.setExpanded(newExpandedState);
-                notifyDataSetChanged(); // refresh all items
+                notifyDataSetChanged();
 
                 if (listener != null) listener.onItemToggle(order);
             };
@@ -150,12 +150,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.ivexpandIcon.setOnClickListener(toggleListener);
             b.getRoot().setOnClickListener(toggleListener);
 
-            // ✅ Confirm Pickup button
+
             b.btnConfirmPickup.setOnClickListener(v -> {
                 if (listener != null) listener.onConfirmPickup(order);
             });
 
-            // ✅ Show "Select an Option" dialog
+
             b.tvSelectOption.setOnClickListener(v -> {
                 String[] options = {"Pickup", "Delivered"};
                 new android.app.AlertDialog.Builder(context)

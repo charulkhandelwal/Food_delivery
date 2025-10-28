@@ -3,7 +3,6 @@ package com.example.food_delivery.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,7 +28,6 @@ public class personal_Document extends AppCompatActivity {
 
         binding.ivBack.setOnClickListener(v -> finish());
 
-
         binding.cardAadhaar.setOnClickListener(v -> startActivity(new Intent(this, Aadharcard_Activity.class)));
         binding.cardPan.setOnClickListener(v -> startActivity(new Intent(this, PANCARD_Activity.class)));
         binding.cardDL.setOnClickListener(v -> startActivity(new Intent(this, DriverLicense_Activity.class)));
@@ -44,14 +42,20 @@ public class personal_Document extends AppCompatActivity {
             }
 
             if (hasAadhaar && hasPan && hasDl) {
-
                 updateDocumentStatus("aadhaar");
                 updateDocumentStatus("pan");
                 updateDocumentStatus("dl");
 
                 Toast.makeText(this, "✅ All documents uploaded!", Toast.LENGTH_SHORT).show();
-                binding.pendingSection.setVisibility(View.GONE);
-                binding.completedSection.setVisibility(View.VISIBLE);
+                binding.pendingSection.setVisibility(android.view.View.GONE);
+                binding.completedSection.setVisibility(android.view.View.VISIBLE);
+
+
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("doc_type", "personal");
+                setResult(RESULT_OK, resultIntent);
+                finish();
+
             } else {
                 Toast.makeText(this, "⚠ Please upload Aadhaar, PAN & Driving License!", Toast.LENGTH_SHORT).show();
             }

@@ -121,7 +121,7 @@ public class Order extends Fragment {
                     setupAdapter();
                 }
                 else {
-                    // 👇 Add these lines before the toast
+
                     Log.e("API_RESPONSE_CODE", "Code: " + response.code());
                     try {
                         if (response.errorBody() != null) {
@@ -192,7 +192,7 @@ public class Order extends Fragment {
                         newOrder.setRestaurantData(restData);
                     }
 
-                    // Pickup location
+
                     JSONObject pickupLoc = obj.optJSONObject("pickupLocation");
                     if (pickupLoc != null) {
                         OrderModel.ResultsBean.AddressBean addr =
@@ -201,13 +201,13 @@ public class Order extends Fragment {
                         newOrder.setAddress(addr);
                     }
 
-                    // Add message as dummy price or info if needed
+
                     newOrder.setPaymentStatus(obj.optString("message", ""));
 
-                    // 🧠 Add it to top of the list (like new order)
+
                     orderList.add(0, newOrder);
 
-                    // 🧾 Update adapter
+
                     if (adapter != null) {
                         adapter.notifyItemInserted(0);
                         binding.recyclerOrders.scrollToPosition(0);
@@ -215,7 +215,7 @@ public class Order extends Fragment {
                         setupAdapter();
                     }
 
-                    // 🌀 Optionally refresh via API to sync all
+
                     loadActiveOrders();
 
                     Toast.makeText(requireContext(),
@@ -256,12 +256,7 @@ public class Order extends Fragment {
         });
         binding.recyclerOrders.setAdapter(adapter);
 
-       /* // ✅ Confirm Pickup → Open Map
-        binding.btnConfirmPickup.setOnClickListener(v -> {
 
-        });*/
-
-        // ✅ Start button → test location + socket emit
         binding.btnStart.setOnClickListener(v -> {
             if (selectedLatLng != null) {
                 if (selectedOrder.getAddress() == null) {
@@ -279,7 +274,7 @@ public class Order extends Fragment {
         });
     }
 
-    // ✅ Show order detail view
+
     private void showOrderDetail(OrderModel.ResultsBean order) {
         binding.layoutNoOrders.setVisibility(View.GONE);
         binding.layoutOrderList.setVisibility(View.GONE);
@@ -294,7 +289,6 @@ public class Order extends Fragment {
         }
     }
 
-    // ✅ Open Google Map to select delivery location
     private void openMapForSelectedOrder() {
         binding.layoutOrderList.setVisibility(View.GONE);
         binding.layoutMapTracking.setVisibility(View.VISIBLE);
@@ -337,7 +331,7 @@ public class Order extends Fragment {
 
 
 
-    // ✅ Convert lat/lng → readable address
+
     private String getAddressFromLatLng(LatLng latLng) {
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
         try {
@@ -351,7 +345,7 @@ public class Order extends Fragment {
         return null;
     }
 
-    // ✅ Emit live location to socket
+
     private void sendSelectedLocationToSocket(double lat, double lng) {
         try {
             if (partnerId == null || partnerId.isEmpty()) {
@@ -376,7 +370,7 @@ public class Order extends Fragment {
         }
     }
 
-    // ✅ Start background location updates
+
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&

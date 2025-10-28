@@ -16,10 +16,9 @@ public class splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ✅ Set splash screen layout
         setContentView(R.layout.activity_splash);
 
-        // ✅ Delay splash for 2 seconds before moving next
+
         new Handler().postDelayed(this::checkNextScreen, 2000);
     }
 
@@ -28,10 +27,10 @@ public class splash extends AppCompatActivity {
         String token = DocumentPrefs.getToken(this);
 
         if (token == null || token.isEmpty()) {
-            // 🔹 User not logged in → OTP screen
+
             startActivity(new Intent(this, Sign_up.class));
         } else {
-            // 🔹 Already logged in → MainActivity
+
             startActivity(new Intent(this, MainActivity.class));
         }
 

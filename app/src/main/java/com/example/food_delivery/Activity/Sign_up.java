@@ -79,7 +79,7 @@ public class Sign_up extends AppCompatActivity {
                 return;
             }
 
-            // ✅ Proceed to send OTP
+
             sendOtpApi(countryCode, phone);
         });
     }
@@ -87,7 +87,7 @@ public class Sign_up extends AppCompatActivity {
     private void sendOtpApi(String countryCode, String phone) {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
 
-        // ✅ Prepare request body
+
         Map<String, String> body = new HashMap<>();
         body.put("countryCode", countryCode);
         body.put("mobile", phone);
@@ -107,7 +107,7 @@ public class Sign_up extends AppCompatActivity {
 
                         Toast.makeText(Sign_up.this, otpResponse.message, Toast.LENGTH_SHORT).show();
 
-                        // ✅ Move to OTP screen and pass both values
+
                         Intent intent = new Intent(Sign_up.this, OtpActivity.class);
                         intent.putExtra("mobile", phone);
                         intent.putExtra("countryCode", countryCode);

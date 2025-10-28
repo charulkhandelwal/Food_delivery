@@ -46,11 +46,10 @@ public class VehicleDetails_Activity extends AppCompatActivity {
         // Back button
         binding.ivBack.setOnClickListener(v -> finish());
 
-        // Upload front/back
         binding.btnUploadFront.setOnClickListener(v -> selectImage("vehicle_front"));
         binding.btnUploadBack.setOnClickListener(v -> selectImage("vehicle_back"));
 
-        // Save button
+
         binding.btnSubmit.setOnClickListener(v -> saveVehicleDetails());
 
         loadSavedImages();
@@ -120,7 +119,7 @@ public class VehicleDetails_Activity extends AppCompatActivity {
 
         ArrayList<DocumentModel> docList = DocumentPrefs.getDocumentList(this);
 
-        // Front
+
         boolean frontExists = false;
         for (DocumentModel doc : docList) {
             if (doc.getDocName().equals("vehicle_front")) {
@@ -135,7 +134,7 @@ public class VehicleDetails_Activity extends AppCompatActivity {
             docList.add(frontDoc);
         }
 
-        // Back
+
         boolean backExists = false;
         for (DocumentModel doc : docList) {
             if (doc.getDocName().equals("vehicle_back")) {
@@ -154,9 +153,11 @@ public class VehicleDetails_Activity extends AppCompatActivity {
 
         Toast.makeText(this, "Vehicle details saved!", Toast.LENGTH_SHORT).show();
 
-        // Finish and return RESULT_OK
-        setResult(Activity.RESULT_OK);
+        Intent result = new Intent();
+        result.putExtra("doc_type", "vehicle");
+        setResult(Activity.RESULT_OK, result);
         finish();
+
     }
 
     private void showPreview(String docName, Uri uri) {

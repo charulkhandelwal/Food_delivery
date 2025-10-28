@@ -1,11 +1,11 @@
 package com.example.food_delivery.Activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.food_delivery.Model.DocumentModel;
@@ -22,7 +22,6 @@ public class BankAccount_Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityBankAccountBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -48,24 +47,17 @@ public class BankAccount_Activity extends AppCompatActivity {
         editor.putString("ifscCode", ifscCode);
         editor.apply();
 
-
         ArrayList<DocumentModel> docList = DocumentPrefs.getDocumentList(this);
-        boolean bankAdded = false;
-        for (DocumentModel doc : docList) {
-            if (doc.getDocName().equals("bank")) {
-                bankAdded = true;
-                break;
-            }
-        }
-        if (!bankAdded) {
-            docList.add(new DocumentModel("bank", "Bank Account Details"));
-            DocumentPrefs.saveDocumentList(this, docList);
-        }
+        docList.removeIf(doc -> doc.getDocName().equals("bank"));
+        DocumentModel bankDoc = new DocumentModel("bank", "Bank Account Details");
+        docList.add(bankDoc);
+        DocumentPrefs.saveDocumentList(this, docList);
 
         Toast.makeText(this, "Bank details saved!", Toast.LENGTH_SHORT).show();
 
-
-        setResult(Activity.RESULT_OK);
+        Intent result = new Intent();
+        result.putExtra("doc_type", "bank");
+        setResult(Activity.RESULT_OK, result);
         finish();
     }
 
