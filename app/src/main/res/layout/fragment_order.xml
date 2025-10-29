@@ -68,7 +68,8 @@
                     android:layout_height="match_parent"
                     android:clipToPadding="false"
                     tools:listitem="@layout/order_item"
-                    android:paddingBottom="12dp" />
+                    android:paddingBottom="12dp"
+                    android:visibility="visible"/>
             </LinearLayout>
 
         </RelativeLayout>
@@ -77,15 +78,25 @@
             android:id="@+id/layoutMapTracking"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="110dp"
+            android:layout_marginTop="50dp"
             android:orientation="vertical"
             android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_back"
+                android:visibility="visible"
+                android:backgroundTint="@color/black"/>
 
             <FrameLayout
                 android:id="@+id/mapFragmentContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
 
             <TextView
                 android:id="@+id/tvMapSelectedAddress"

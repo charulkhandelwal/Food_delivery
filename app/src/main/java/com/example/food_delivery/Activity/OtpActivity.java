@@ -137,10 +137,8 @@ public class OtpActivity extends AppCompatActivity {
 
                         Intent intent;
                         if (isNewUser) {
-
                             intent = new Intent(OtpActivity.this, Personal_informationActivity.class);
                         } else {
-
                             intent = new Intent(OtpActivity.this, MainActivity.class);
                         }
 

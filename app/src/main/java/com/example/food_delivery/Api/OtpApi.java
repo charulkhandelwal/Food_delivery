@@ -1,6 +1,7 @@
 package com.example.food_delivery.Api;
 
 import com.example.food_delivery.Activity.Sign_up;
+import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.DocumentResponse;
 import com.example.food_delivery.Model.OrderModel;
 import com.example.food_delivery.Model.GetProfileResponse;
@@ -84,4 +85,11 @@ public interface OtpApi {
     Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
     @GET("delivery-partner/profile")
     Call<GetProfileResponse> getProfile();
+
+    @POST("delivery-partner/orders/accept")
+    Call<AcceptRejectOrderModel> updateAcceptRejectOrder(
+            @Header("Authorization") String token,
+            @Body Map<String, String> body
+    );
+
 }

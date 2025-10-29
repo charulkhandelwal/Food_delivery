@@ -20,6 +20,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     public interface OnOrderActionListener {
         void onConfirmPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
+        void onCancelPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
 
         void onItemToggle(OrderModel.ResultsBean order);       // Item header clicked to expand/collapse
     }
@@ -69,7 +70,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
         public void bind(final OrderModel.ResultsBean order) {
             // ✅ Basic info
-            b.restaurantName.setText(order.getRestaurantData().getName());
+            String restaurantName = (order.getRestaurantData() != null &&
+                    order.getRestaurantData().getName() != null)
+                    ? order.getRestaurantData().getName()
+                    : (order.getRestaurantData() != null ? order.getRestaurantData().getName() : "Unknown");
+
+            b.restaurantName.setText(restaurantName);
+
             b.tvorderId.setText("Order No. #" + order.getOrderId());
             b.tvUserName.setText(order.getUserData() != null && order.getUserData().getFullName() != null
                     ? order.getUserData().getFullName()
@@ -109,12 +116,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             // ✅ Price (convert int to string)
             b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
 
-            // ✅ Address (city or full address)
-            if (order.getRestaurantData().getAddress() != null && order.getRestaurantData().getAddress().isEmpty()) {
+            if (order.getRestaurantData() != null &&
+                    !TextUtils.isEmpty(order.getRestaurantData().getAddress())) {
                 b.tvAddress.setText("📍 " + order.getRestaurantData().getAddress());
-            } else {
-                b.tvAddress.setText("No address selected yet");
+            }else {
+                b.tvAddress.setText("No address available");
             }
+
 
             if (order.getUserData() != null && order.getUserData().getAddresses() != null && !order.getUserData().getAddresses().isEmpty()) {
                 b.tvPickupLocation.setText(order.getUserData().getAddresses().get(0).getCompleteAddress());
@@ -162,6 +170,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 if (listener != null) listener.onConfirmPickup(order);
             });
 
+            b.btnCancelPickup.setOnClickListener(v -> {
+                listener.onCancelPickup(order);
+            });
             // ✅ Show "Select an Option" dialog
             b.tvSelectOption.setOnClickListener(v -> {
                 String[] options = {"Pickup", "Delivered"};

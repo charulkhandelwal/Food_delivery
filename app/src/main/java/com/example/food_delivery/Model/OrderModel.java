@@ -43,12 +43,21 @@ public class OrderModel {
         // ✅ Local fields
         private transient boolean isNew = true;
         private transient boolean isExpanded = false;
+        private transient boolean isFromSocket = false;
 
         public boolean isNew() { return isNew; }
         public void setNew(boolean isNew) { this.isNew = isNew; }
 
         public boolean isExpanded() { return isExpanded; }
         public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
+
+        public boolean isFromSocket() {
+            return isFromSocket;
+        }
+
+        public void setFromSocket(boolean fromSocket) {
+            this.isFromSocket = fromSocket;
+        }
 
         public String get_id() { return _id; }
         public void set_id(String _id) { this._id = _id; }

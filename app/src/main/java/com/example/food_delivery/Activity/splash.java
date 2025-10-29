@@ -27,13 +27,14 @@ public class splash extends AppCompatActivity {
         Log.e("tannu", "bhbvghjdfg");
         String token = DocumentPrefs.getToken(this);
 
-        if (token == null || token.isEmpty()) {
+       /* if (token == null || token.isEmpty()) {
             // 🔹 User not logged in → OTP screen
             startActivity(new Intent(this, Sign_up.class));
         } else {
             // 🔹 Already logged in → MainActivity
             startActivity(new Intent(this, MainActivity.class));
-        }
+        }*/
+        startActivity(new Intent(this, Sign_up.class));
 
         finish();
     }
