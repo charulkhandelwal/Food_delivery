@@ -1,17 +1,20 @@
 package com.example.food_delivery.fragment;
 
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,23 +38,27 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import io.socket.client.Socket;
@@ -59,7 +66,7 @@ import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
+import android.view.animation.Interpolator;
 
 public class Order extends Fragment {
 
@@ -69,20 +76,18 @@ public class Order extends Fragment {
     private LatLng selectedLatLng;  // Delivery partner selected location
     private LatLng restaurantLatLng; // Restaurant location
     private Marker partnerMarker;   // For updating marker dynamically
-
-
     private FusedLocationProviderClient fusedLocationClient;
     private boolean isUpdating = false;
     private boolean isMapOpen = false;
-
     private Socket socket;
     private String partnerId;
-
     private static final String TAG = "SocketDebug";
-
     private OrderAdapter adapter;
     private SupportMapFragment mapFragment;
     private LocationCallback locationCallback;
+    private GoogleMap liveGoogleMap;
+    private LatLng lastLatLng; // 🆕 For movement check
+    private Polyline routePolyline;
 
 
     @Nullable
@@ -153,11 +158,31 @@ public class Order extends Fragment {
         });
 
         binding.btnBack.setOnClickListener(v -> {
+            // 🛑 Stop live updates and reset states
+            stopLocationUpdates();
+            isMapOpen = false;
+            isUpdating = false;
+            lastLatLng = null;
+
+            if (liveGoogleMap != null) {
+                liveGoogleMap.clear(); // clear markers and polylines
+                liveGoogleMap = null;
+            }
+
+            // 🧭 Reset marker + polyline references
+            partnerMarker = null;
+            routePolyline = null;
+
+            // 🧩 Switch UI back to order list
             binding.layoutMapTracking.setVisibility(View.GONE);
             binding.layoutOrderList.setVisibility(View.VISIBLE);
             binding.titleOrders.setVisibility(View.VISIBLE);
             binding.btnBack.setVisibility(View.GONE);
+
+            Toast.makeText(requireContext(), "🛑 Tracking stopped", Toast.LENGTH_SHORT).show();
         });
+
+
     }
 
     private void loadActiveOrders() {
@@ -306,26 +331,19 @@ public class Order extends Fragment {
                         emitOrderResponseSocket(selectedOrder.get_id(), "accepted");
                         Toast.makeText(requireContext(), "✅ Accepted via Socket", Toast.LENGTH_SHORT).show();
                         Log.e("socket hit", "123");
+
+                        // ✅ Now open map only after accepted confirmation
+                        openMapIfCoordinatesExist(order);
+
+
                     } else {
                         // ✅ Order came from API → hit accept API
                         Log.e("api hit", "123");
                         Toast.makeText(requireContext(), "✅ Accepted via api", Toast.LENGTH_SHORT).show();
                         callAcceptORRejctApi("accepted", selectedOrder.get_id());
                     }
+                    setOrderDetailsData(selectedOrder);
 
-                    if (order.getRestaurantData() != null && order.getRestaurantData().getAddresslatLng() != null && order.getRestaurantData().getAddresslatLng().getCoordinates() != null && order.getRestaurantData().getAddresslatLng().getCoordinates().size() >= 2) {
-
-                        List<Double> corrdinates = order.getRestaurantData().getAddresslatLng().getCoordinates();
-                        double restaurantLng = corrdinates.get(0);
-                        double restaurantLat = corrdinates.get(1);
-                        Log.e("restaurant long", String.valueOf(restaurantLng));
-                        Log.e("restaurant lat", String.valueOf(restaurantLat));
-                        openMapForSelectedOrder(restaurantLat, restaurantLng);
-
-                    } else {
-                        Log.e("OrderDebug", "⚠️ Missing restaurant coordinates — skipping map open.");
-                        Toast.makeText(requireContext(), "Restaurant location not available", Toast.LENGTH_SHORT).show();
-                    }
                 } else
                     Toast.makeText(requireContext(), "Select an order first", Toast.LENGTH_SHORT).show();
 //                showOrderDetail(order);
@@ -355,6 +373,57 @@ public class Order extends Fragment {
 
     }
 
+    private void setOrderDetailsData(OrderModel.ResultsBean order) {
+        try {
+            if (getView() == null) return;
+
+            // ✅ Restaurant Details
+            if (order.getRestaurantData() != null) {
+                binding.tvRestaurantName.setText("Name: " + (order.getRestaurantData().getName() != null ? order.getRestaurantData().getName() : "-"));
+                binding.tvRestaurantAddress.setText("Address: " + (order.getRestaurantData().getAddress() != null ? order.getRestaurantData().getAddress() : "-"));
+            }
+
+            // ✅ Order Details
+            binding.tvOrderId.setText("Order ID: " + (order.getOrderId() != null ? order.getOrderId() : "-"));
+            binding.tvOrderAmount.setText(
+                    "Amount: " + (order.getFinalPrice() > 0 ? "₹" + order.getFinalPrice() : "-")
+            );
+
+            // ✅ Delivery Details
+            if (order.getRestaurantData().getAddress() != null) {
+                binding.tvDeliveryAddress.setText("Delivery Address: " + order.getRestaurantData().getAddress());
+            } else {
+                binding.tvDeliveryAddress.setText("Delivery Address: -");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("setOrderDetailsData", "Error setting order details: " + e.getMessage());
+        }
+    }
+
+
+    private void openMapIfCoordinatesExist(OrderModel.ResultsBean order) {
+        if (order.getRestaurantData() != null &&
+                order.getRestaurantData().getAddresslatLng() != null &&
+                order.getRestaurantData().getAddresslatLng().getCoordinates() != null &&
+                order.getRestaurantData().getAddresslatLng().getCoordinates().size() >= 2) {
+
+            List<Double> coordinates = order.getRestaurantData().getAddresslatLng().getCoordinates();
+            double restaurantLng = coordinates.get(0);
+            double restaurantLat = coordinates.get(1);
+
+            Log.e("restaurant long", String.valueOf(restaurantLng));
+            Log.e("restaurant lat", String.valueOf(restaurantLat));
+
+            openMapForSelectedOrder(restaurantLat, restaurantLng);
+        } else {
+            Log.e("OrderDebug", "⚠️ Missing restaurant coordinates — skipping map open.");
+            Toast.makeText(requireContext(), "Restaurant location not available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
     @SuppressLint("MissingPermission")
     private void openMapForSelectedOrder(double restaurantLat, double restaurantLng) {
         isMapOpen = true;
@@ -363,6 +432,7 @@ public class Order extends Fragment {
         binding.btnBack.setVisibility(View.VISIBLE);
 
         mapFragment.getMapAsync(googleMap -> {
+            liveGoogleMap = googleMap;
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
                     selectedLatLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -371,17 +441,18 @@ public class Order extends Fragment {
                     googleMap.clear();
 
                     // 🟦 Add Delivery Partner Marker
-                    partnerMarker = googleMap.addMarker(new MarkerOptions().position(selectedLatLng).title("🚴 Delivery Partner").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                    partnerMarker = googleMap.addMarker(new MarkerOptions()
+                            .position(selectedLatLng)
+                            .title("🚴 Delivery Partner")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
                     // 🟥 Add Restaurant Marker
-                    googleMap.addMarker(new MarkerOptions().position(restaurantLatLng).title("📍 Restaurant Location").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    googleMap.addMarker(new MarkerOptions()
+                            .position(restaurantLatLng)
+                            .title("📍 Restaurant Location")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
-                    // 🟩 Draw Polygon (area between partner & restaurant)
-                    PolygonOptions polygonOptions = new PolygonOptions().add(selectedLatLng).add(new LatLng(selectedLatLng.latitude, restaurantLatLng.longitude)).add(restaurantLatLng).add(new LatLng(restaurantLatLng.latitude, selectedLatLng.longitude)).strokeColor(Color.BLUE).fillColor(0x220000FF).strokeWidth(4f);
-                    googleMap.addPolygon(polygonOptions);
-
-                    // 🟦 Draw connecting line
-                    googleMap.addPolyline(new PolylineOptions().add(selectedLatLng).add(restaurantLatLng).width(6f).color(Color.BLUE));
+                    drawRouteFromRestaurantToPartner(selectedLatLng, restaurantLatLng);
 
                     // 🧭 Zoom camera to include both points
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -399,6 +470,259 @@ public class Order extends Fragment {
             });
         });
     }
+
+    /**
+     * 🚗 Draws driving route from restaurant to driver using Google Directions API
+     */
+   /* private void drawRouteFromRestaurantToPartner(LatLng start, LatLng end) {
+        String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                + start.latitude + "," + start.longitude
+                + "&destination=" + end.latitude + "," + end.longitude
+                + "&mode=driving&key=AIzaSyCBub0tSv16vf0M4D8rq-wfXATMPQQw3tY";
+
+        new Thread(() -> {
+            try {
+                URL directionsUrl = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection) directionsUrl.openConnection();
+                conn.connect();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) sb.append(line);
+                br.close();
+
+                Log.d("ROUTE_RESPONSE", sb.toString()); // 🧾 Log to verify response
+
+                JSONObject jsonObject = new JSONObject(sb.toString());
+                JSONArray routes = jsonObject.getJSONArray("routes");
+
+                if (routes.length() > 0) {
+                    JSONObject route = routes.getJSONObject(0);
+                    JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                    String points = overviewPolyline.getString("points");
+
+                    List<LatLng> decodedPath = decodePoly(points);
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (routePolyline != null) routePolyline.remove();
+                        routePolyline = liveGoogleMap.addPolyline(new PolylineOptions()
+                                .addAll(decodedPath)
+                                .color(Color.BLUE)
+                                .width(10f)
+                                .geodesic(true));
+
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        builder.include(start);
+                        builder.include(end);
+                        liveGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }*/
+
+    private void drawRouteFromRestaurantToPartner(LatLng start, LatLng end) {
+        // OSRM API for driving directions (no API key needed)
+        String url = "https://router.project-osrm.org/route/v1/driving/"
+                + start.longitude + "," + start.latitude + ";"
+                + end.longitude + "," + end.latitude
+                + "?overview=full&geometries=polyline";
+
+        new Thread(() -> {
+            try {
+                URL directionsUrl = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection) directionsUrl.openConnection();
+                conn.connect();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) sb.append(line);
+                br.close();
+
+                JSONObject jsonObject = new JSONObject(sb.toString());
+                JSONArray routes = jsonObject.getJSONArray("routes");
+
+                if (routes.length() > 0) {
+                    JSONObject route = routes.getJSONObject(0);
+                    String points = route.getJSONObject("geometry").getString("coordinates");
+
+                    // OSRM gives polyline in "geometry" but if "geometries=polyline" is used, decode it
+                    String polyline = route.getString("geometry");
+                    List<LatLng> decodedPath = decodePoly(polyline);
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (routePolyline != null) routePolyline.remove();
+                        routePolyline = liveGoogleMap.addPolyline(new PolylineOptions()
+                                .addAll(decodedPath)
+                                .color(Color.BLUE)
+                                .width(10f)
+                                .geodesic(true));
+
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        builder.include(start);
+                        builder.include(end);
+                        liveGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+                    });
+                } else {
+                    Log.e("ROUTE_ERROR", "No routes found in OSRM response");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private List<LatLng> decodePoly(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            poly.add(new LatLng((lat / 1E5), (lng / 1E5)));
+        }
+        return poly;
+    }
+
+
+    // ✅ Start background location updates and move marker dynamically
+    @SuppressLint("MissingPermission")
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(requireContext(), "Enable location permission", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (isUpdating) return;
+        isUpdating = true;
+
+        LocationRequest req = LocationRequest.create();
+        req.setInterval(3000); // every 3 sec
+        req.setFastestInterval(2000);
+        req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // ✅ Keep a reference so we can stop updates later
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) return;
+
+                Location location = locationResult.getLastLocation();
+                if (location != null && partnerMarker != null) {
+
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+
+                    Log.d(TAG, "📍 Live GPS: " + lat + ", " + lng);
+
+                    LatLng newLatLng = new LatLng(lat, lng);
+                    // 🚴 If not moved
+                    if (lastLatLng != null && distanceBetween(lastLatLng, newLatLng) < 3) { // within 3 meters
+                        Log.d("MAP_TRACKING", "🟡 No movement detected.");
+                        return;
+                    }
+                    lastLatLng = newLatLng; // update last known position
+
+                    // ✅ Send to socket
+                    sendSelectedLocationToSocket(lat, lng);
+
+                    // ✅ Animate the marker smoothly instead of jumping
+                    animateMarkerSmoothly(partnerMarker, newLatLng);
+
+                    // ✅ If route not drawn yet, draw it now using Google Directions API
+                    if (routePolyline == null) {
+                        drawRouteFromRestaurantToPartner(restaurantLatLng, newLatLng);
+                    } else {
+                        // update polyline dynamically as driver moves
+                        updateDriverPositionOnRoute(newLatLng);
+                    }
+
+                    // 🧮 Log live distance (optional)
+                    float distance = calculateDistance(lat, lng, restaurantLatLng.latitude, restaurantLatLng.longitude);
+                    Log.d("MAP_TRACKING", "🚴 Distance to restaurant: " + distance + " meters");
+
+                }
+
+            }
+        };
+
+        fusedLocationClient.requestLocationUpdates(req, locationCallback, Looper.getMainLooper());
+    }
+
+    /**
+     * 🗺️ Update driver’s position on existing route
+     */
+    private void updateDriverPositionOnRoute(LatLng newLatLng) {
+        if (routePolyline != null) {
+            List<LatLng> points = routePolyline.getPoints();
+            if (!points.isEmpty()) {
+                points.set(0, newLatLng);
+                routePolyline.setPoints(points);
+            }
+        }
+    }
+
+    private float calculateDistance(double startLat, double startLng, double endLat, double endLng) {
+        float[] result = new float[1];
+        Location.distanceBetween(startLat, startLng, endLat, endLng, result);
+        return result[0];
+    }
+
+    private float distanceBetween(LatLng start, LatLng end) {
+        float[] result = new float[1];
+        Location.distanceBetween(start.latitude, start.longitude, end.latitude, end.longitude, result);
+        return result[0];
+    }
+
+    private void animateMarkerSmoothly(Marker marker, LatLng toPosition) {
+        final LatLng start = marker.getPosition();
+        final long duration = 2000; // 2 seconds per move
+        final Interpolator interpolator = new LinearInterpolator();
+        final Handler handler = new Handler();
+        final long startTime = SystemClock.uptimeMillis();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - startTime;
+                float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                double lat = (toPosition.latitude - start.latitude) * t + start.latitude;
+                double lng = (toPosition.longitude - start.longitude) * t + start.longitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                // Camera follows delivery partner
+                liveGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16); // 60 FPS smooth
+                }
+            }
+        });
+    }
+
 
 
     // ✅ Emit live location to socket
@@ -426,43 +750,6 @@ public class Order extends Fragment {
         }
     }
 
-    // ✅ Start background location updates and move marker dynamically
-    @SuppressLint("MissingPermission")
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(requireContext(), "Enable location permission", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (isUpdating) return;
-        isUpdating = true;
-
-        LocationRequest req = LocationRequest.create();
-        req.setInterval(3000); // every 3 sec
-        req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        // ✅ Keep a reference so we can stop updates later
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) return;
-
-                double lat = locationResult.getLastLocation().getLatitude();
-                double lng = locationResult.getLastLocation().getLongitude();
-                Log.d(TAG, "📍 Live GPS: " + lat + ", " + lng);
-
-                // ✅ Send to socket
-                sendSelectedLocationToSocket(lat, lng);
-
-                // ✅ Move marker on map if visible
-                if (partnerMarker != null) {
-                    partnerMarker.setPosition(new LatLng(lat, lng));
-                }
-            }
-        };
-
-        fusedLocationClient.requestLocationUpdates(req, locationCallback, null);
-    }
 
     // ✅ Stop location updates when needed (e.g., on delivery complete or fragment closed)
     private void stopLocationUpdates() {
@@ -492,10 +779,17 @@ public class Order extends Fragment {
                     if (model.isSuccess()) {
                         Toast.makeText(requireContext(), "✅ " + model.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.d("status updated", model.getMessage());
+
+                        // ✅ Only open map if order accepted successfully
+                        if (model.getMessage().contains("accepted")) {
+                            if (selectedOrder != null) {
+                                openMapIfCoordinatesExist(selectedOrder);
+                            }
+                        }
+
                         // 🔄 Refresh active order list
                         loadActiveOrders();
 
-//                        emitOrderResponseSocket(orderId, status);
                     } else {
                         Toast.makeText(requireContext(), "❌ " + model.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.e("failed12", model.getMessage());
