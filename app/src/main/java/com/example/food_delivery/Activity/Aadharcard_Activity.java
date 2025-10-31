@@ -255,18 +255,21 @@ public class Aadharcard_Activity extends AppCompatActivity {
 
                     if (frontUrl != null && !frontUrl.isEmpty()) {
                         binding.imgFrontPreview.setVisibility(View.VISIBLE);
-                        Glide.with(Aadharcard_Activity.this)
+
+                        Glide.with(binding.getRoot().getContext())
                                 .load(frontUrl)
                                 .centerCrop()
                                 .into(binding.imgFrontPreview);
+
                     }
 
                     if (backUrl != null && !backUrl.isEmpty()) {
                         binding.imgBackPreview.setVisibility(View.VISIBLE);
-                        Glide.with(Aadharcard_Activity.this)
-                                .load(backUrl)
+                        Glide.with(binding.getRoot().getContext())
+                                .load(frontUrl)
                                 .centerCrop()
                                 .into(binding.imgBackPreview);
+
                     }
 
                     Log.d("DOC_FETCH", "✅ Showing images for " + docType);

@@ -65,7 +65,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".Activity.OrderHistoryAcitivity"
+            android:exported="false" />
+
+        <activity
             android:name=".Activity.Document_Activity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.Aadharcard_Activity"
             android:exported="false" />
         <activity
             android:name=".Activity.splash"
