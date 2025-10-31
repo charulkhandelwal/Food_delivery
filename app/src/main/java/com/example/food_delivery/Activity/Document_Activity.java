@@ -36,7 +36,7 @@ public class Document_Activity extends AppCompatActivity {
         binding.pendingVehicle.setOnClickListener(v -> openUploadScreen("rc"));
         binding.pendingBank.setOnClickListener(v -> openBankScreen("bankDetails"));
 
-        // ✅ Button now checks status and navigates to MainActivity only if all approved
+
         binding.btnSubmit.setOnClickListener(v -> checkAllApprovedAndProceed());
     }
 
@@ -52,7 +52,7 @@ public class Document_Activity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // ✅ This is the method triggered by Submit button
+
     private void checkAllApprovedAndProceed() {
         binding.progressBar.setVisibility(View.VISIBLE);
         String token = DocumentPrefs.getToken(this);
@@ -180,6 +180,6 @@ public class Document_Activity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getDocumentsFromServer(); // Refresh automatically
+        getDocumentsFromServer();
     }
 }

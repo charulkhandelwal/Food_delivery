@@ -81,7 +81,7 @@ public class BankAccount_Activity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
-                //binding.progressBar.setVisibility(View.GONE);
+
                 Log.e("BANK_GET_FAIL", "Error: " + t.getMessage());
                 Toast.makeText(BankAccount_Activity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

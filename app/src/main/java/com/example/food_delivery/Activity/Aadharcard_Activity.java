@@ -125,7 +125,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
                 .show();
     }
 
-    // ✅ Open Camera
+
     private void openCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -139,12 +139,12 @@ public class Aadharcard_Activity extends AppCompatActivity {
         cameraLauncher.launch(tempCameraUri);
     }
 
-    // ✅ Open Gallery
+
     private void openGallery() {
         galleryLauncher.launch("image/*");
     }
 
-    // ✅ Show preview image
+
     private void showPreview(String type, Uri uri) {
         if (type.equals("front")) {
             frontUri = uri;
@@ -157,7 +157,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
         }
     }
 
-    // ✅ Upload to Server
+
     private void uploadDocumentsToServer() {
         String token = DocumentPrefs.getToken(this);
         if (token == null || token.isEmpty()) {
@@ -211,7 +211,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
         });
     }
 
-    // ✅ Fetch already uploaded documents
+
     private void getUploadedDocuments() {
         String token = DocumentPrefs.getToken(this);
         if (token == null || token.isEmpty()) return;
@@ -282,7 +282,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
         });
     }
 
-    // ✅ Helpers
+
     private RequestBody createPartFromString(String value) {
         return RequestBody.create(MediaType.parse("text/plain"), value);
     }
