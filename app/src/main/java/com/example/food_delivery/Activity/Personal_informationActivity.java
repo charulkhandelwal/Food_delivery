@@ -65,11 +65,6 @@ public class Personal_informationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (DocumentPrefs.getProfile(this) != null) {
-            startActivity(new Intent(this, Document_Activity.class));
-            finish();
-            return;
-        }
 
         binding = ActivityPersonalInformationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -81,6 +76,13 @@ public class Personal_informationActivity extends AppCompatActivity {
         binding.btnSubmit.setOnClickListener(v -> submitProfileMultipart());
 
         loadCitiesData();
+
+       /* if (DocumentPrefs.getProfile(this) != null) {
+            startActivity(new Intent(this, Document_Activity.class));
+            finish();
+            return;
+        }*/
+
     }
 
     private void initLaunchers() {

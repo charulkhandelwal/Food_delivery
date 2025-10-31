@@ -8,6 +8,7 @@ import com.example.food_delivery.Model.OtpResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.Model.ProfileModel;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
@@ -21,6 +22,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 
 public interface OtpApi {
     @Headers("Content-Type: application/json")
@@ -53,26 +55,18 @@ public interface OtpApi {
 
 
     @Multipart
-    @POST("delivery-partner/documents")
+    @PUT("delivery-partner/documents")
     Call<DocumentResponse> uploadDocuments(
-            @Part MultipartBody.Part aadharFront,
-            @Part MultipartBody.Part aadharBack,
-            @Part MultipartBody.Part panFront,
-            @Part MultipartBody.Part panBack,
-            @Part MultipartBody.Part drivingLicenceFront,
-            @Part MultipartBody.Part drivingLicenceBack,
-            @Part MultipartBody.Part rcFront,
-            @Part MultipartBody.Part rcBack,
-            @Part("accountNumber") RequestBody accountNumber,
-            @Part("ifscCode") RequestBody ifscCode,
-            @Part("name") RequestBody name
-//            @Part("docType") RequestBody docType
-
+            @PartMap Map<String, RequestBody> formFields,
+            @Part List<MultipartBody.Part> files
     );
+
+
 
 
     @GET("delivery-partner/orders/active")
     Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
     @GET("delivery-partner/profile")
     Call<GetProfileResponse> getProfile();
+
 }

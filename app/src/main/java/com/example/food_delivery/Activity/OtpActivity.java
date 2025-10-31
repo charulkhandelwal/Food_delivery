@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.food_delivery.Api.ApiClient;
 import com.example.food_delivery.Api.OtpApi;
+import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.Socket.SocketManager;
@@ -37,7 +38,6 @@ public class OtpActivity extends AppCompatActivity {
         binding = ActivityOtpBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         phone = getIntent().getStringExtra("mobile");
         String codeFromIntent = getIntent().getStringExtra("countryCode");
         if (codeFromIntent != null && !codeFromIntent.isEmpty()) {
@@ -46,12 +46,8 @@ public class OtpActivity extends AppCompatActivity {
 
         Log.e("OTP_ACTIVITY", "📞 Phone: " + phone + " | CountryCode: " + countryCode);
 
-
         binding.BtnBack.setOnClickListener(v -> onBackPressed());
-
-
         setupOtpInputs();
-
 
         binding.btnverify.setOnClickListener(v -> {
             String otp = getOtpFromInputs();
@@ -86,7 +82,6 @@ public class OtpActivity extends AppCompatActivity {
         }
     }
 
-
     private String getOtpFromInputs() {
         return binding.etOtp1.getText().toString().trim() +
                 binding.etOtp2.getText().toString().trim() +
@@ -95,7 +90,6 @@ public class OtpActivity extends AppCompatActivity {
                 binding.etOtp5.getText().toString().trim() +
                 binding.etOtp6.getText().toString().trim();
     }
-
 
     private void verifyOtpApi(String phone, String otp, String countryCode) {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
@@ -121,7 +115,6 @@ public class OtpActivity extends AppCompatActivity {
                         String partnerId = otpResponse.results.partner.id;
                         boolean isNewUser = otpResponse.results.isNewUser;
 
-
                         DocumentPrefs.saveToken(OtpActivity.this, token);
                         DocumentPrefs.savePartnerId(OtpActivity.this, partnerId);
 
@@ -129,23 +122,18 @@ public class OtpActivity extends AppCompatActivity {
                         Log.e("PARTNER_ID_SAVED", partnerId);
                         Log.e("IS_NEW_USER", "isNewUser: " + isNewUser);
 
-
                         connectSocket(partnerId);
 
-                        Toast.makeText(OtpActivity.this, "OTP Verified Successfully", Toast.LENGTH_SHORT).show();
-
-
-                        Intent intent;
                         if (isNewUser) {
-
-                            intent = new Intent(OtpActivity.this, Personal_informationActivity.class);
+                            // New user → go fill personal info first
+                            Log.d("NAVIGATION", "🆕 New user → Personal Info screen");
+                            startActivity(new Intent(OtpActivity.this, Personal_informationActivity.class));
+                            finish();
                         } else {
-
-                            intent = new Intent(OtpActivity.this, MainActivity.class);
+                            // Existing user → fetch documents
+                            Log.d("NAVIGATION", "👤 Existing user → checking document statuses...");
+                            getDocumentsFromServer(token);
                         }
-
-                        startActivity(intent);
-                        finish();
 
                     } else {
                         Toast.makeText(OtpActivity.this, otpResponse.message, Toast.LENGTH_SHORT).show();
@@ -165,6 +153,66 @@ public class OtpActivity extends AppCompatActivity {
         });
     }
 
+    private void getDocumentsFromServer(String token) {
+        OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
+        Call<DocumentGetResponse> call = api.getdocuments();
+
+        Log.d("DOC_API", "📡 Fetching documents with token: " + token);
+
+        call.enqueue(new Callback<DocumentGetResponse>() {
+            @Override
+            public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    DocumentGetResponse.Documents docs = response.body().getResults().documents;
+
+                    String aadharStatus = docs.aadhar != null ? docs.aadhar.status : "pending";
+                    String panStatus = docs.pan != null ? docs.pan.status : "pending";
+                    String dlStatus = docs.drivingLicence != null ? docs.drivingLicence.status : "pending";
+                    String rcStatus = docs.rc != null ? docs.rc.status : "pending";
+                    String bankStatus = docs.bankAccountDetails != null ? docs.bankAccountDetails.status : "pending";
+
+                    Log.e("DOC_STATUS",
+                            "📄 Aadhar=" + aadharStatus +
+                                    ", PAN=" + panStatus +
+                                    ", DL=" + dlStatus +
+                                    ", RC=" + rcStatus +
+                                    ", Bank=" + bankStatus);
+
+                    boolean allApproved =
+                            aadharStatus.equalsIgnoreCase("approved") &&
+                                    panStatus.equalsIgnoreCase("approved") &&
+                                    dlStatus.equalsIgnoreCase("approved") &&
+                                    rcStatus.equalsIgnoreCase("approved") &&
+                                    bankStatus.equalsIgnoreCase("approved");
+
+                    Intent intent;
+                    if (allApproved) {
+                        Log.d("NAVIGATION", "✅ All documents approved → going to MAIN");
+                        intent = new Intent(OtpActivity.this, MainActivity.class);
+                    } else {
+                        Log.d("NAVIGATION", "📄 Pending or rejected docs → going to DOCUMENT screen");
+                        intent = new Intent(OtpActivity.this, Document_Activity.class);
+                    }
+
+                    startActivity(intent);
+                    finish();
+
+                } else {
+                    Log.e("DOC_API_FAIL", "❌ Response code: " + response.code());
+                    Toast.makeText(OtpActivity.this, "Document fetch failed", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(OtpActivity.this, Document_Activity.class));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
+                Log.e("DOC_API_ERROR", "⚠️ Failed to fetch documents: " + t.getMessage());
+                startActivity(new Intent(OtpActivity.this, Document_Activity.class));
+                finish();
+            }
+        });
+    }
 
     private void connectSocket(String partnerId) {
         try {

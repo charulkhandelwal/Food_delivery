@@ -1,36 +1,57 @@
 package com.example.food_delivery.Activity;
+
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.food_delivery.Model.DocumentModel;
+import com.bumptech.glide.Glide;
+import com.example.food_delivery.Api.ApiClient;
+import com.example.food_delivery.Api.OtpApi;
+import com.example.food_delivery.Model.DocumentGetResponse;
+import com.example.food_delivery.Model.DocumentResponse;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityAadharcardBinding;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Aadharcard_Activity extends AppCompatActivity {
 
     private ActivityAadharcardBinding binding;
-    private ArrayList<DocumentModel> documentList;
-    private Uri frontUri, backUri;
-    private Uri tempCameraUri;
-    private String currentDoc = "";
+    private Uri frontUri, backUri, tempCameraUri;
+    private String currentDoc = "", docType = "";
+    private static final int CAMERA_PERMISSION_REQUEST = 101;
 
     private ActivityResultLauncher<Uri> cameraLauncher;
-    private ActivityResultLauncher<String[]> galleryLauncher;
+    private ActivityResultLauncher<String> galleryLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,62 +59,65 @@ public class Aadharcard_Activity extends AppCompatActivity {
         binding = ActivityAadharcardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        documentList = DocumentPrefs.getDocumentList(this);
+        docType = getIntent().getStringExtra("docType");
+        if (docType == null) docType = "aadhar";
 
         binding.ivBack.setOnClickListener(v -> finish());
-
         initLaunchers();
 
-        binding.btnUploadFront.setOnClickListener(v -> selectImage("aadhaar_front"));
-        binding.btnUploadBack.setOnClickListener(v -> selectImage("aadhaar_back"));
+        binding.btnUploadFront.setOnClickListener(v -> selectImage("front"));
+        binding.btnUploadBack.setOnClickListener(v -> selectImage("back"));
 
-        binding.btnSubmit.setOnClickListener(v -> {
-            if (frontUri != null && backUri != null) {
-                saveDocument("aadhaar_front", frontUri);
-                saveDocument("aadhaar_back", backUri);
-                DocumentPrefs.saveDocumentList(this, documentList);
-                Toast.makeText(this, "✅ Aadhaar submitted successfully!", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(this, "⚠ Please upload both front and back photos!", Toast.LENGTH_SHORT).show();
+        // Hide or disable back upload depending on document type
+        if (docType.equalsIgnoreCase("pan")) {
+            binding.btnUploadBack.setEnabled(false);
+            binding.btnUploadBack.setAlpha(0.5f);
+            binding.imgBackPreview.setVisibility(View.GONE);
+        }
+
+        binding.btnSubmit.setOnClickListener(v -> uploadDocumentsToServer());
+
+
+        switch (docType.toLowerCase()) {
+            case "aadhar":
+                binding.tvTitle.setText("Upload Aadhar Card");
+                break;
+            case "pan":
+                binding.tvTitle.setText("Upload PAN Card");
+                break;
+            case "drivinglicence":
+                binding.tvTitle.setText("Upload Driving Licence");
+                break;
+            case "rc":
+                binding.tvTitle.setText("Upload RC Document");
+                break;
+        }
+
+        // ✅ Fetch uploaded doc if exists
+        getUploadedDocuments();
+    }
+
+    // ✅ Initialize Launchers
+    private void initLaunchers() {
+        cameraLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
+            if (result && tempCameraUri != null) {
+                showPreview(currentDoc, tempCameraUri);
             }
         });
 
-        loadSavedImages();
+        galleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri != null) {
+                showPreview(currentDoc, uri);
+            }
+        });
     }
 
-    private void initLaunchers() {
-        cameraLauncher = registerForActivityResult(
-                new ActivityResultContracts.TakePicture(),
-                result -> {
-                    if (result && tempCameraUri != null) {
-                        if (currentDoc.equals("aadhaar_front")) frontUri = tempCameraUri;
-                        else backUri = tempCameraUri;
-                        showPreview(currentDoc, tempCameraUri);
-                    }
-                });
-
-        galleryLauncher = registerForActivityResult(
-                new ActivityResultContracts.OpenDocument(),
-                uri -> {
-                    if (uri != null) {
-                        try {
-                            final int takeFlags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                            getContentResolver().takePersistableUriPermission(uri, takeFlags);
-                        } catch (Exception ignored) { }
-                        if (currentDoc.equals("aadhaar_front")) frontUri = uri;
-                        else backUri = uri;
-                        showPreview(currentDoc, uri);
-                    }
-                });
-    }
-
-    private void selectImage(String docName) {
-        currentDoc = docName;
+    // ✅ Select source
+    private void selectImage(String type) {
+        currentDoc = type;
         String[] options = {"Camera", "Gallery"};
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Select Image")
+        new AlertDialog.Builder(this)
+                .setTitle("Select Image Source")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) openCamera();
                     else openGallery();
@@ -101,71 +125,195 @@ public class Aadharcard_Activity extends AppCompatActivity {
                 .show();
     }
 
+    // ✅ Open Camera
     private void openCamera() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, 101);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST);
             return;
         }
+
         ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "Aadhaar_Image");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "Temp");
-        tempCameraUri = getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        values.put(MediaStore.Images.Media.TITLE, "Document_Image");
+        tempCameraUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         cameraLauncher.launch(tempCameraUri);
     }
 
+    // ✅ Open Gallery
     private void openGallery() {
-        galleryLauncher.launch(new String[]{"image/*"});
+        galleryLauncher.launch("image/*");
     }
 
-    private void saveDocument(String docName, Uri uri) {
-        boolean found = false;
-        for (DocumentModel model : documentList) {
-            if (model.getDocName().equals(docName)) {
-                model.setImageUri(uri.toString());
-                found = true;
-                break;
+    // ✅ Show preview image
+    private void showPreview(String type, Uri uri) {
+        if (type.equals("front")) {
+            frontUri = uri;
+            binding.imgFrontPreview.setVisibility(View.VISIBLE);
+            Glide.with(this).load(uri).centerCrop().into(binding.imgFrontPreview);
+        } else {
+            backUri = uri;
+            binding.imgBackPreview.setVisibility(View.VISIBLE);
+            Glide.with(this).load(uri).centerCrop().into(binding.imgBackPreview);
+        }
+    }
+
+    // ✅ Upload to Server
+    private void uploadDocumentsToServer() {
+        String token = DocumentPrefs.getToken(this);
+        if (token == null || token.isEmpty()) {
+            Toast.makeText(this, "Token missing! Please login again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (frontUri == null) {
+            Toast.makeText(this, "Please select front image first!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("Uploading " + docType + "...");
+        dialog.setCancelable(false);
+        dialog.show();
+
+        Map<String, RequestBody> formFields = new HashMap<>();
+        formFields.put("docType", createPartFromString(docType));
+
+        List<MultipartBody.Part> files = new ArrayList<>();
+        File frontFile = getFileFromUri(frontUri);
+        files.add(prepareFilePart(docType + "Front", frontFile));
+
+        if (backUri != null && !docType.equalsIgnoreCase("pan")) {
+            File backFile = getFileFromUri(backUri);
+            files.add(prepareFilePart(docType + "Back", backFile));
+        }
+
+        OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
+        api.uploadDocuments(formFields, files).enqueue(new Callback<DocumentResponse>() {
+            @Override
+            public void onResponse(Call<DocumentResponse> call, Response<DocumentResponse> response) {
+                dialog.dismiss();
+                if (response.isSuccessful()) {
+                    Toast.makeText(Aadharcard_Activity.this, "Uploaded successfully!", Toast.LENGTH_SHORT).show();
+                    Log.d("UPLOAD_SUCCESS", "Document uploaded: " + docType);
+                    getUploadedDocuments();
+                } else {
+                    Log.e("UPLOAD_FAIL", "Code: " + response.code());
+                    Toast.makeText(Aadharcard_Activity.this, "Upload failed! Try again.", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
-        if (!found) documentList.add(new DocumentModel(docName, uri.toString()));
-    }
 
-    private void showPreview(String docName, Uri uri) {
-        if (docName.equals("aadhaar_front")) {
-            binding.imgFrontPreview.setImageURI(uri);
-            binding.imgFrontPreview.setVisibility(android.view.View.VISIBLE);
-        } else if (docName.equals("aadhaar_back")) {
-            binding.imgBackPreview.setImageURI(uri);
-            binding.imgBackPreview.setVisibility(android.view.View.VISIBLE);
-        }
-    }
-
-    private void loadSavedImages() {
-        for (DocumentModel model : documentList) {
-            Uri uri = Uri.parse(model.getImageUri());
-            if (model.getDocName().equals("aadhaar_front")) {
-                frontUri = uri;
-                binding.imgFrontPreview.setImageURI(frontUri);
-                binding.imgFrontPreview.setVisibility(android.view.View.VISIBLE);
-            } else if (model.getDocName().equals("aadhaar_back")) {
-                backUri = uri;
-                binding.imgBackPreview.setImageURI(backUri);
-                binding.imgBackPreview.setVisibility(android.view.View.VISIBLE);
+            @Override
+            public void onFailure(Call<DocumentResponse> call, Throwable t) {
+                dialog.dismiss();
+                Log.e("UPLOAD_ERROR", "Error: " + t.getMessage());
+                Toast.makeText(Aadharcard_Activity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+
+    // ✅ Fetch already uploaded documents
+    private void getUploadedDocuments() {
+        String token = DocumentPrefs.getToken(this);
+        if (token == null || token.isEmpty()) return;
+
+        OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
+        api.getdocuments().enqueue(new Callback<DocumentGetResponse>() {
+            @Override
+            public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
+                    DocumentGetResponse.Documents docs = response.body().getResults().documents;
+                    if (docs == null) return;
+
+                    String frontUrl = null;
+                    String backUrl = null;
+
+                    switch (docType.toLowerCase()) {
+                        case "aadhar":
+                            if (docs.aadhar != null) {
+                                frontUrl = docs.aadhar.front;
+                                backUrl = docs.aadhar.back;
+                            }
+                            break;
+                        case "pan":
+                            if (docs.pan != null) {
+                                frontUrl = docs.pan.front;
+                            }
+                            break;
+                        case "drivinglicence":
+                            if (docs.drivingLicence != null) {
+                                frontUrl = docs.drivingLicence.front;
+                                backUrl = docs.drivingLicence.back;
+                            }
+                            break;
+                        case "rc":
+                            if (docs.rc != null) {
+                                frontUrl = docs.rc.front;
+                                backUrl = docs.rc.back;
+                            }
+                            break;
+                    }
+
+                    if (frontUrl != null && !frontUrl.isEmpty()) {
+                        binding.imgFrontPreview.setVisibility(View.VISIBLE);
+                        Glide.with(Aadharcard_Activity.this)
+                                .load(frontUrl)
+                                .centerCrop()
+                                .into(binding.imgFrontPreview);
+                    }
+
+                    if (backUrl != null && !backUrl.isEmpty()) {
+                        binding.imgBackPreview.setVisibility(View.VISIBLE);
+                        Glide.with(Aadharcard_Activity.this)
+                                .load(backUrl)
+                                .centerCrop()
+                                .into(binding.imgBackPreview);
+                    }
+
+                    Log.d("DOC_FETCH", "✅ Showing images for " + docType);
+                } else {
+                    Log.e("GET_FAIL", "❌ Response failed: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
+                Log.e("GET_ERROR", "⚠️ Error: " + t.getMessage());
+            }
+        });
+    }
+
+    // ✅ Helpers
+    private RequestBody createPartFromString(String value) {
+        return RequestBody.create(MediaType.parse("text/plain"), value);
+    }
+
+    private MultipartBody.Part prepareFilePart(String partName, File file) {
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
+
+    private File getFileFromUri(Uri uri) {
+        File file = new File(getCacheDir(), System.currentTimeMillis() + "_temp.jpg");
+        try (InputStream input = getContentResolver().openInputStream(uri);
+             FileOutputStream output = new FileOutputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = input.read(buffer)) > 0) output.write(buffer, 0, len);
+        } catch (Exception e) {
+            Log.e("FileError", "getFileFromUri: " + e.getMessage());
         }
+        return file;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 101 && grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            openCamera();
-        } else {
-            Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+        if (requestCode == CAMERA_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

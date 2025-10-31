@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.food_delivery.Model.DocumentModel;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityDriverLicenseBinding;
@@ -42,7 +43,6 @@ public class DriverLicense_Activity extends AppCompatActivity {
         documentList = DocumentPrefs.getDocumentList(this);
 
         binding.ivBack.setOnClickListener(v -> finish());
-
         initLaunchers();
 
         binding.btnUploadFrontDL.setOnClickListener(v -> selectImage("dl_front"));
@@ -60,7 +60,7 @@ public class DriverLicense_Activity extends AppCompatActivity {
             }
         });
 
-        loadSavedImages();
+        loadSavedImages(); // Load previews on reopen
     }
 
     private void initLaunchers() {
@@ -79,8 +79,8 @@ public class DriverLicense_Activity extends AppCompatActivity {
                 uri -> {
                     if (uri != null) {
                         try {
-                            final int takeFlags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            final int takeFlags = (Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             getContentResolver().takePersistableUriPermission(uri, takeFlags);
                         } catch (Exception ignored) { }
                         if (currentDoc.equals("dl_front")) frontUri = uri;
@@ -135,28 +135,32 @@ public class DriverLicense_Activity extends AppCompatActivity {
 
     private void showPreview(String docName, Uri uri) {
         if (docName.equals("dl_front")) {
-            binding.imgFrontPreviewDL.setImageURI(uri);
+            Glide.with(this).load(uri).into(binding.imgFrontPreviewDL);
             binding.imgFrontPreviewDL.setVisibility(android.view.View.VISIBLE);
         } else if (docName.equals("dl_back")) {
-            binding.imgBackPreviewDL.setImageURI(uri);
+            Glide.with(this).load(uri).into(binding.imgBackPreviewDL);
             binding.imgBackPreviewDL.setVisibility(android.view.View.VISIBLE);
         }
     }
 
     private void loadSavedImages() {
         for (DocumentModel model : documentList) {
-            Uri uri = Uri.parse(model.getImageUri());
+            String uriStr = model.getImageUri();
+            if (uriStr == null || uriStr.isEmpty()) continue; // <-- Null-safe check
+
+            Uri uri = Uri.parse(uriStr);
             if (model.getDocName().equals("dl_front")) {
                 frontUri = uri;
-                binding.imgFrontPreviewDL.setImageURI(frontUri);
+                Glide.with(this).load(frontUri).into(binding.imgFrontPreviewDL);
                 binding.imgFrontPreviewDL.setVisibility(android.view.View.VISIBLE);
             } else if (model.getDocName().equals("dl_back")) {
                 backUri = uri;
-                binding.imgBackPreviewDL.setImageURI(backUri);
+                Glide.with(this).load(backUri).into(binding.imgBackPreviewDL);
                 binding.imgBackPreviewDL.setVisibility(android.view.View.VISIBLE);
             }
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,

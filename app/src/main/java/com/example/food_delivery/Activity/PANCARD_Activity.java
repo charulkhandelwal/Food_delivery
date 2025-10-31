@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.food_delivery.Model.DocumentModel;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityPancardBinding;
@@ -42,7 +43,6 @@ public class PANCARD_Activity extends AppCompatActivity {
         documentList = DocumentPrefs.getDocumentList(this);
 
         binding.ivBack.setOnClickListener(v -> finish());
-
         initLaunchers();
 
         binding.btnUploadFront.setOnClickListener(v -> selectImage("pan_front"));
@@ -53,14 +53,14 @@ public class PANCARD_Activity extends AppCompatActivity {
                 saveDocument("pan_front", frontUri);
                 saveDocument("pan_back", backUri);
                 DocumentPrefs.saveDocumentList(this, documentList);
-                Toast.makeText(this, "✅ PAN submitted successfully!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "✅ PAN Card submitted successfully!", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
                 Toast.makeText(this, "⚠ Please upload both front and back photos!", Toast.LENGTH_SHORT).show();
             }
         });
 
-        loadSavedImages();
+        loadSavedImages(); // Load previews on reopen
     }
 
     private void initLaunchers() {
@@ -79,8 +79,8 @@ public class PANCARD_Activity extends AppCompatActivity {
                 uri -> {
                     if (uri != null) {
                         try {
-                            final int takeFlags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            final int takeFlags = (Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             getContentResolver().takePersistableUriPermission(uri, takeFlags);
                         } catch (Exception ignored) { }
                         if (currentDoc.equals("pan_front")) frontUri = uri;
@@ -135,28 +135,32 @@ public class PANCARD_Activity extends AppCompatActivity {
 
     private void showPreview(String docName, Uri uri) {
         if (docName.equals("pan_front")) {
-            binding.imgFrontPreview.setImageURI(uri);
+            Glide.with(this).load(uri).into(binding.imgFrontPreview);
             binding.imgFrontPreview.setVisibility(android.view.View.VISIBLE);
         } else if (docName.equals("pan_back")) {
-            binding.imgBackPreview.setImageURI(uri);
+            Glide.with(this).load(uri).into(binding.imgBackPreview);
             binding.imgBackPreview.setVisibility(android.view.View.VISIBLE);
         }
     }
 
     private void loadSavedImages() {
         for (DocumentModel model : documentList) {
-            Uri uri = Uri.parse(model.getImageUri());
+            String uriStr = model.getImageUri();
+            if (uriStr == null || uriStr.isEmpty()) continue; // <-- null check
+
+            Uri uri = Uri.parse(uriStr);
             if (model.getDocName().equals("pan_front")) {
                 frontUri = uri;
-                binding.imgFrontPreview.setImageURI(frontUri);
+                Glide.with(this).load(frontUri).into(binding.imgFrontPreview);
                 binding.imgFrontPreview.setVisibility(android.view.View.VISIBLE);
             } else if (model.getDocName().equals("pan_back")) {
                 backUri = uri;
-                binding.imgBackPreview.setImageURI(backUri);
+                Glide.with(this).load(backUri).into(binding.imgBackPreview);
                 binding.imgBackPreview.setVisibility(android.view.View.VISIBLE);
             }
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,

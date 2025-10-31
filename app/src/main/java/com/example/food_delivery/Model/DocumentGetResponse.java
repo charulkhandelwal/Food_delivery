@@ -106,17 +106,25 @@ public class DocumentGetResponse {
 
     public static class Pan {
         public String status;
+        public String front;
     }
 
     public static class DrivingLicence {
         public String status;
+        public String back;
+        public String front;
     }
 
     public static class Rc {
         public String status;
+        public String back;
+        public String front;
     }
 
     public static class BankAccountDetails {
         public String status;
+        public String name;
+        public  String accountNumber;
+        public String ifscCode;
     }
 }

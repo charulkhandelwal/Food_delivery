@@ -1,34 +1,19 @@
 package com.example.food_delivery.Activity;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.food_delivery.Api.ApiClient;
 import com.example.food_delivery.Api.OtpApi;
 import com.example.food_delivery.Model.DocumentGetResponse;
-import com.example.food_delivery.Model.DocumentModel;
-import com.example.food_delivery.Model.DocumentResponse;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityDocumentBinding;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,16 +21,6 @@ import retrofit2.Response;
 public class Document_Activity extends AppCompatActivity {
 
     private ActivityDocumentBinding binding;
-    private ArrayList<DocumentModel> documentList;
-
-    private final ActivityResultLauncher<Intent> documentLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK) {
-
-                    documentList = DocumentPrefs.getDocumentList(this);
-                    checkDocsStatus();
-                }
-            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,48 +28,40 @@ public class Document_Activity extends AppCompatActivity {
         binding = ActivityDocumentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        documentList = DocumentPrefs.getDocumentList(this);
-        checkDocsStatus();
-
         getDocumentsFromServer();
 
-        binding.pendingPersonal.setOnClickListener(v -> {
-            Intent intent = new Intent(this, personal_Document.class);
-            documentLauncher.launch(intent);
-        });
+        binding.pendingPersonal5.setOnClickListener(v -> openUploadScreen("aadhar"));
+        binding.pendingPersonal2.setOnClickListener(v -> openUploadScreen("pan"));
+        binding.pendingPersonal.setOnClickListener(v -> openUploadScreen("drivingLicence"));
+        binding.pendingVehicle.setOnClickListener(v -> openUploadScreen("rc"));
+        binding.pendingBank.setOnClickListener(v -> openBankScreen("bankDetails"));
 
-        binding.pendingVehicle.setOnClickListener(v -> {
-            Intent intent = new Intent(this, VehicleDetails_Activity.class);
-            documentLauncher.launch(intent);
-        });
-
-        binding.pendingBank.setOnClickListener(v -> {
-            Intent intent = new Intent(this, BankAccount_Activity.class);
-            documentLauncher.launch(intent);
-        });
-
-        binding.backiv1.setOnClickListener(v -> binding.pendingPersonal.performClick());
-        binding.backiv2.setOnClickListener(v -> binding.pendingVehicle.performClick());
-        binding.back3.setOnClickListener(v -> binding.pendingBank.performClick());
-
-        binding.btnSubmit.setOnClickListener(v -> {
-            if (isAllDocumentsUploaded()) {
-                uploadDocumentsToServer();
-            } else {
-                Toast.makeText(this, "Please upload all documents before submitting", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // ✅ Button now checks status and navigates to MainActivity only if all approved
+        binding.btnSubmit.setOnClickListener(v -> checkAllApprovedAndProceed());
     }
 
+    private void openUploadScreen(String docType) {
+        Intent intent = new Intent(this, Aadharcard_Activity.class);
+        intent.putExtra("docType", docType);
+        startActivity(intent);
+    }
 
-    private void getDocumentsFromServer() {
+    private void openBankScreen(String docType) {
+        Intent intent = new Intent(this, BankAccount_Activity.class);
+        intent.putExtra("docType", docType);
+        startActivity(intent);
+    }
+
+    // ✅ This is the method triggered by Submit button
+    private void checkAllApprovedAndProceed() {
+        binding.progressBar.setVisibility(View.VISIBLE);
         String token = DocumentPrefs.getToken(this);
-        if (token == null || token.isEmpty()) {
-            Log.w("GET_DOCS", "Token missing, aborting getDocumentsFromServer");
+
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Missing token! Please log in again.", Toast.LENGTH_SHORT).show();
+            binding.progressBar.setVisibility(View.GONE);
             return;
         }
-
-        binding.progressBar.setVisibility(View.VISIBLE);
 
         OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
         Call<DocumentGetResponse> call = api.getdocuments();
@@ -104,228 +71,115 @@ public class Document_Activity extends AppCompatActivity {
             public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    List<DocumentModel> docs = response.body().getDocuments();
-                    Log.d("GET_DOCS", "Fetched docs count: " + (docs == null ? 0 : docs.size()));
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    DocumentGetResponse.Documents docs = response.body().getResults().documents;
 
-                    if (docs != null) {
-                        // docs are already DocumentModel instances created in DocumentGetResponse.getDocuments()
-                        documentList = new ArrayList<>(docs);
-                        DocumentPrefs.saveDocumentList(Document_Activity.this, documentList);
-                        checkDocsStatus();
+                    String aadharStatus = docs.aadhar != null ? docs.aadhar.status : "pending";
+                    String panStatus = docs.pan != null ? docs.pan.status : "pending";
+                    String dlStatus = docs.drivingLicence != null ? docs.drivingLicence.status : "pending";
+                    String rcStatus = docs.rc != null ? docs.rc.status : "pending";
+                    String bankStatus = docs.bankAccountDetails != null ? docs.bankAccountDetails.status : "pending";
+
+                    boolean allApproved =
+                            aadharStatus.equalsIgnoreCase("approved") &&
+                                    panStatus.equalsIgnoreCase("approved") &&
+                                    dlStatus.equalsIgnoreCase("approved") &&
+                                    rcStatus.equalsIgnoreCase("approved") &&
+                                    bankStatus.equalsIgnoreCase("approved");
+
+                    if (allApproved) {
+                        Toast.makeText(Document_Activity.this, "✅ All documents approved!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Document_Activity.this, MainActivity.class));
+                        finish();
                     } else {
-                        Log.w("GET_DOCS", "No documents in response body");
+                        Toast.makeText(Document_Activity.this, "Some documents are still pending or rejected.", Toast.LENGTH_SHORT).show();
+                        getDocumentsFromServer(); // Refresh UI
                     }
+
                 } else {
-                    Log.e("GET_DOCS", "GET documents failed, code: " + response.code());
+                    Toast.makeText(Document_Activity.this, "Failed to fetch document status.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                Log.e("GET_DOCS", "GET documents error: " + t.getMessage());
+                Toast.makeText(Document_Activity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // -------------------------
-    // Upload documents to server
-    // -------------------------
-    private void uploadDocumentsToServer() {
+    private void getDocumentsFromServer() {
+        binding.progressBar.setVisibility(View.VISIBLE);
         String token = DocumentPrefs.getToken(this);
-        Log.d("UPLOAD_DOCS", "Token: " + token);
 
-        OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
-        ArrayList<DocumentModel> savedDocs = DocumentPrefs.getDocumentList(this);
-
-        if (savedDocs == null || savedDocs.isEmpty()) {
-            Toast.makeText(this, "No saved documents found!", Toast.LENGTH_SHORT).show();
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Missing token! Please log in again.", Toast.LENGTH_SHORT).show();
+            binding.progressBar.setVisibility(View.GONE);
             return;
         }
 
-        // Show loader and disable submit
-        binding.progressBar.setVisibility(View.VISIBLE);
-        binding.btnSubmit.setEnabled(false);
+        OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
+        Call<DocumentGetResponse> call = api.getdocuments();
 
-        MultipartBody.Part aadharFront = null, aadharBack = null,
-                panFront = null, panBack = null,
-                drivingLicenceFront = null, drivingLicenceBack = null,
-                rcFront = null, rcBack = null;
+        Log.d("DOC_API", "Fetching documents with token: " + token);
 
-        for (DocumentModel doc : savedDocs) {
-            try {
-                String uriStr = doc.getImageUri();
-                if (uriStr == null || uriStr.trim().isEmpty()) {
-                    Log.w("UPLOAD_SKIP", "Skipping doc (no URI): " + doc.getDocName());
-                    continue;
-                }
-
-                // accept both content:// and file:// URIs
-                if (!uriStr.startsWith("content://") && !uriStr.startsWith("file://")) {
-                    Log.w("UPLOAD_SKIP", "Skipping invalid URI scheme for " + doc.getDocName() + ": " + uriStr);
-                    continue;
-                }
-
-                Uri uri = Uri.parse(uriStr);
-                String tempName = doc.getDocName().toLowerCase().replace(" ", "_") + ".jpg";
-                File file = copyUriToInternalStorage(uri, tempName);
-                logFileStatus(doc.getDocName(), file);
-
-                MultipartBody.Part part = null;
-                String nameLower = doc.getDocName().toLowerCase();
-
-                if (nameLower.contains("aadhaar") && nameLower.contains("front"))
-                    part = prepareFilePart("aadharFront", file);
-                else if (nameLower.contains("aadhaar") && nameLower.contains("back"))
-                    part = prepareFilePart("aadharBack", file);
-                else if (nameLower.contains("pan") && nameLower.contains("front"))
-                    part = prepareFilePart("panFront", file);
-                else if (nameLower.contains("pan") && nameLower.contains("back"))
-                    part = prepareFilePart("panBack", file);
-                else if (nameLower.contains("dl") && nameLower.contains("front"))
-                    part = prepareFilePart("drivingLicenceFront", file);
-                else if (nameLower.contains("dl") && nameLower.contains("back"))
-                    part = prepareFilePart("drivingLicenceBack", file);
-                else if (nameLower.contains("vehicle") && nameLower.contains("front"))
-                    part = prepareFilePart("rcFront", file);
-                else if (nameLower.contains("vehicle") && nameLower.contains("back"))
-                    part = prepareFilePart("rcBack", file);
-
-                if (part != null) {
-                    if (nameLower.contains("aadhaar") && nameLower.contains("front")) aadharFront = part;
-                    else if (nameLower.contains("aadhaar") && nameLower.contains("back")) aadharBack = part;
-                    else if (nameLower.contains("pan") && nameLower.contains("front")) panFront = part;
-                    else if (nameLower.contains("pan") && nameLower.contains("back")) panBack = part;
-                    else if (nameLower.contains("dl") && nameLower.contains("front")) drivingLicenceFront = part;
-                    else if (nameLower.contains("dl") && nameLower.contains("back")) drivingLicenceBack = part;
-                    else if (nameLower.contains("vehicle") && nameLower.contains("front")) rcFront = part;
-                    else if (nameLower.contains("vehicle") && nameLower.contains("back")) rcBack = part;
-                }
-
-            } catch (Exception e) {
-                Log.e("UPLOAD_ERROR", "Error preparing file for " + doc.getDocName() + " : " + e.getMessage());
-            }
-        }
-
-        // Dummy bank details (replace with real values)
-        RequestBody accountNumber = RequestBody.create(MediaType.parse("text/plain"), "1234567890");
-        RequestBody ifscCode = RequestBody.create(MediaType.parse("text/plain"), "SBIN0001234");
-        RequestBody name = RequestBody.create(MediaType.parse("text/plain"), "Ravi Sharma");
-
-        Call<DocumentResponse> call = api.uploadDocuments(
-                aadharFront, aadharBack,
-                panFront, panBack,
-                drivingLicenceFront, drivingLicenceBack,
-                rcFront, rcBack,
-                accountNumber, ifscCode, name
-        );
-
-        call.enqueue(new Callback<DocumentResponse>() {
+        call.enqueue(new Callback<DocumentGetResponse>() {
             @Override
-            public void onResponse(Call<DocumentResponse> call, Response<DocumentResponse> response) {
+            public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
-                binding.btnSubmit.setEnabled(true);
 
-                Log.d("UPLOAD_API", "Response code: " + response.code());
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(Document_Activity.this, "✅ Documents uploaded successfully!", Toast.LENGTH_SHORT).show();
-                    DocumentPrefs.setDocsUploaded(Document_Activity.this, true);
-
-                    // Refresh verification status from server after upload
-                    getDocumentsFromServer();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    updateUI(response.body().getResults().documents);
+                    Log.d("DOC_API", "Response: " + response.body().getMessage());
                 } else {
-                    Toast.makeText(Document_Activity.this, "Upload failed! code: " + response.code(), Toast.LENGTH_SHORT).show();
-                    Log.e("UPLOAD_API", "Error body: " + response.errorBody());
+                    Log.e("DOC_API", "Error response: " + response.code());
+                    Toast.makeText(Document_Activity.this, "Failed to fetch documents", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<DocumentResponse> call, Throwable t) {
+            public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
-                binding.btnSubmit.setEnabled(true);
-                Log.e("UPLOAD_API", "Upload failed: " + t.getMessage());
-                Toast.makeText(Document_Activity.this, "Upload error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("DOC_API", "API failed: " + t.getMessage());
+                Toast.makeText(Document_Activity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // -------------------------
-    // Helpers
-    // -------------------------
-    private File copyUriToInternalStorage(Uri uri, String fileName) {
-        File file = new File(getFilesDir(), fileName);
-        try (InputStream input = getContentResolver().openInputStream(uri);
-             OutputStream output = new FileOutputStream(file)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = input.read(buffer)) != -1) output.write(buffer, 0, bytesRead);
-            Log.d("SAVE_URI", "Copied " + fileName + " -> " + file.getAbsolutePath());
-        } catch (Exception e) {
-            Log.e("SAVE_URI", "Error copying URI to internal storage: " + e.getMessage());
-        }
-        return file;
+    private void updateUI(DocumentGetResponse.Documents documents) {
+        setStatus(binding.tvPersonalStatus, documents.aadhar != null ? documents.aadhar.status : null);
+        setStatus(binding.tvPersonalStatus1, documents.pan != null ? documents.pan.status : null);
+        setStatus(binding.tvPersonalStatus3, documents.drivingLicence != null ? documents.drivingLicence.status : null);
+        setStatus(binding.tvVehicleStatus, documents.rc != null ? documents.rc.status : null);
+        setStatus(binding.tvBankStatus, documents.bankAccountDetails != null ? documents.bankAccountDetails.status : null);
     }
 
-    private MultipartBody.Part prepareFilePart(String partName, File file) {
-        if (file != null && file.exists()) {
-            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
-            return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
-        } else {
-            Log.w("UPLOAD_FILE", "Missing file for part: " + partName);
-            return null;
-        }
-    }
-
-    private void logFileStatus(String tag, File file) {
-        if (file != null && file.exists()) {
-            Log.d("UPLOAD_CHECK", tag + " found | " + file.getAbsolutePath() + " | sizeKB=" + (file.length() / 1024));
-        } else {
-            Log.w("UPLOAD_CHECK", tag + " not found");
+    private void setStatus(android.widget.TextView textView, String status) {
+        if (status == null) status = "pending";
+        switch (status.toLowerCase()) {
+            case "uploaded":
+                textView.setText("Uploaded ✅");
+                textView.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
+                break;
+            case "approved":
+                textView.setText("Approved ✅");
+                textView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                break;
+            case "rejected":
+                textView.setText("Rejected ❌");
+                textView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                break;
+            default:
+                textView.setText("Pending ⏳");
+                textView.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+                break;
         }
     }
 
-    // Check local document list (saved) and update completed/pending cards
-    private void checkDocsStatus() {
-        boolean aadhaarUploaded = false, panUploaded = false, dlUploaded = false,
-                vehicleUploaded = false, bankUploaded = false;
-
-        if (documentList != null) {
-            for (DocumentModel model : documentList) {
-                String name = (model.getDocName() == null) ? "" : model.getDocName().toLowerCase();
-                if (name.contains("aadhaar") || name.contains("aadhar")) aadhaarUploaded = true;
-                if (name.contains("pan")) panUploaded = true;
-                if (name.contains("dl") || name.contains("driving")) dlUploaded = true;
-                if (name.contains("vehicle") || name.contains("rc")) vehicleUploaded = true;
-                if (name.contains("bank")) bankUploaded = true;
-            }
-        }
-
-        binding.completedPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.VISIBLE : View.GONE);
-        binding.pendingPersonal.setVisibility(aadhaarUploaded && panUploaded && dlUploaded ? View.GONE : View.VISIBLE);
-
-        binding.completedVehicle.setVisibility(vehicleUploaded ? View.VISIBLE : View.GONE);
-        binding.pendingVehicle.setVisibility(vehicleUploaded ? View.GONE : View.VISIBLE);
-
-        binding.completedBank.setVisibility(bankUploaded ? View.VISIBLE : View.GONE);
-        binding.pendingBank.setVisibility(bankUploaded ? View.GONE : View.VISIBLE);
-    }
-
-    private boolean isAllDocumentsUploaded() {
-        boolean aadhaarUploaded = false, panUploaded = false, dlUploaded = false,
-                vehicleUploaded = false, bankUploaded = false;
-
-        if (documentList != null) {
-            for (DocumentModel model : documentList) {
-                String name = (model.getDocName() == null) ? "" : model.getDocName().toLowerCase();
-                if (name.contains("aadhaar") || name.contains("aadhar")) aadhaarUploaded = true;
-                if (name.contains("pan")) panUploaded = true;
-                if (name.contains("dl") || name.contains("driving")) dlUploaded = true;
-                if (name.contains("vehicle") || name.contains("rc")) vehicleUploaded = true;
-                if (name.contains("bank")) bankUploaded = true;
-            }
-        }
-
-        return aadhaarUploaded && panUploaded && dlUploaded && vehicleUploaded && bankUploaded;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getDocumentsFromServer(); // Refresh automatically
     }
 }
