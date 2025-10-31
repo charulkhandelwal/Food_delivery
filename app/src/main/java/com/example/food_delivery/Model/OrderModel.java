@@ -43,12 +43,21 @@ public class OrderModel {
         // ✅ Local fields
         private transient boolean isNew = true;
         private transient boolean isExpanded = false;
+        private transient boolean isFromSocket = false;
 
         public boolean isNew() { return isNew; }
         public void setNew(boolean isNew) { this.isNew = isNew; }
 
         public boolean isExpanded() { return isExpanded; }
         public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
+
+        public boolean isFromSocket() {
+            return isFromSocket;
+        }
+
+        public void setFromSocket(boolean fromSocket) {
+            this.isFromSocket = fromSocket;
+        }
 
         public String get_id() { return _id; }
         public void set_id(String _id) { this._id = _id; }
@@ -261,7 +270,7 @@ public class OrderModel {
             private Object socialId;
             private boolean notifications;
             private boolean forceLogout;
-            private List<Object> addresses;
+            private List<Address> addresses;
             private String createdAt;
             private String updatedAt;
             private int __v;
@@ -324,8 +333,8 @@ public class OrderModel {
             public boolean isForceLogout() { return forceLogout; }
             public void setForceLogout(boolean forceLogout) { this.forceLogout = forceLogout; }
 
-            public List<Object> getAddresses() { return addresses; }
-            public void setAddresses(List<Object> addresses) { this.addresses = addresses; }
+            public List<Address> getAddresses() { return addresses; }
+            public void setAddresses(List<Address> addresses) { this.addresses = addresses; }
 
             public String getCreatedAt() { return createdAt; }
             public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
@@ -335,6 +344,53 @@ public class OrderModel {
 
             public int get__v() { return __v; }
             public void set__v(int __v) { this.__v = __v; }
+        }
+
+        public class Address {
+            private String country;
+            private String zipCode;
+            private Location location;
+            private String completeAddress;
+            private boolean defaultAddress;
+            private String _id;
+            private String createdAt;
+            private String updatedAt;
+
+            // Getters and Setters
+            public String getCountry() { return country; }
+            public void setCountry(String country) { this.country = country; }
+
+            public String getZipCode() { return zipCode; }
+            public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+
+            public Location getLocation() { return location; }
+            public void setLocation(Location location) { this.location = location; }
+
+            public String getCompleteAddress() { return completeAddress; }
+            public void setCompleteAddress(String completeAddress) { this.completeAddress = completeAddress; }
+
+            public boolean isDefaultAddress() { return defaultAddress; }
+            public void setDefaultAddress(boolean defaultAddress) { this.defaultAddress = defaultAddress; }
+
+            public String get_id() { return _id; }
+            public void set_id(String _id) { this._id = _id; }
+
+            public String getCreatedAt() { return createdAt; }
+            public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+            public String getUpdatedAt() { return updatedAt; }
+            public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+        }
+
+        public class Location {
+            private String type;
+            private List<Double> coordinates;
+
+            public String getType() { return type; }
+            public void setType(String type) { this.type = type; }
+
+            public List<Double> getCoordinates() { return coordinates; }
+            public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
         }
 
     }

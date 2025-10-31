@@ -2,6 +2,7 @@ package com.example.food_delivery.Adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,10 @@ import java.util.List;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
     public interface OnOrderActionListener {
-        void onConfirmPickup(OrderModel.ResultsBean order);
+        void onConfirmPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
+        void onCancelPickup(OrderModel.ResultsBean order);    // User pressed Confirm Pickup
 
-        void onItemToggle(OrderModel.ResultsBean order);
+        void onItemToggle(OrderModel.ResultsBean order);       // Item header clicked to expand/collapse
     }
 
     private final Context context;
@@ -42,7 +44,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
-        OrderModel.ResultsBean order = orders.get(position);
+        OrderModel.ResultsBean order = orders.get(position); // ✅ get current order
         holder.bind(order);
 
        /* // ✅ Highlight new orders
@@ -67,15 +69,21 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
 
         public void bind(final OrderModel.ResultsBean order) {
+            // ✅ Basic info
+            String restaurantName = (order.getRestaurantData() != null &&
+                    order.getRestaurantData().getName() != null)
+                    ? order.getRestaurantData().getName()
+                    : (order.getRestaurantData() != null ? order.getRestaurantData().getName() : "Unknown");
 
-            b.restaurantName.setText(order.getRestaurantData().getName());
+            b.restaurantName.setText(restaurantName);
+
             b.tvorderId.setText("Order No. #" + order.getOrderId());
             b.tvUserName.setText(order.getUserData() != null && order.getUserData().getFullName() != null
                     ? order.getUserData().getFullName()
                     : "Unknown");
 
 
-
+            // ✅ Dynamically add all dishes to the layout
             b.itemsContainer.removeAllViews();
 
             if (order.getDishes() != null && !order.getDishes().isEmpty()) {
@@ -85,10 +93,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                     TextView text1 = itemView.findViewById(android.R.id.text1);
                     TextView text2 = itemView.findViewById(android.R.id.text2);
 
-
-                    String dishName = dish.getName();
-                    int qty = dish.getQuantity();
-                    int price = dish.getPrice();
+                    // Example fields - adjust based on your API model
+                    String dishName = dish.getName(); // e.g. “Besan Ladoo”
+                    int qty = dish.getQuantity();              // e.g. 2
+                    int price = dish.getPrice();          // e.g. 500
 
                     text1.setText(dishName + "  (" + qty + "x)");
                     text2.setText("₹" + price);
@@ -105,21 +113,28 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
 
 
-
+            // ✅ Price (convert int to string)
             b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
 
-
-            if (order.getRestaurantData().getAddress() != null && order.getRestaurantData().getAddress().isEmpty()) {
+            if (order.getRestaurantData() != null &&
+                    !TextUtils.isEmpty(order.getRestaurantData().getAddress())) {
                 b.tvAddress.setText("📍 " + order.getRestaurantData().getAddress());
-            } else {
-                b.tvAddress.setText("No address selected yet");
+            }else {
+                b.tvAddress.setText("No address available");
             }
 
-//
+
+            if (order.getUserData() != null && order.getUserData().getAddresses() != null && !order.getUserData().getAddresses().isEmpty()) {
+                b.tvPickupLocation.setText(order.getUserData().getAddresses().get(0).getCompleteAddress());
+            } else {
+                b.tvPickupLocation.setText("No address available");
+            }
+
+
 //
             b.tvStatus.setText(order.getStatus());
 
-
+            // ✅ Handle expanded/collapsed view
             boolean expanded = order.isExpanded();
             b.tvUserName.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.layoutdetails.setVisibility(expanded ? View.VISIBLE : View.GONE);
@@ -129,20 +144,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.tvSelectOption.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.pickupView.setVisibility(expanded ? View.VISIBLE : View.GONE);
 
-
+            // Rotate arrow with animation for better UX
             b.ivexpandIcon.animate().rotation(expanded ? 180f : 0f).setDuration(200).start();
 
-
+            // ✅ Toggle expand/collapse
             View.OnClickListener toggleListener = v -> {
                 boolean newExpandedState = !order.isExpanded();
 
-
+                // Optional: collapse other items (only one expanded at a time)
                 for (OrderModel.ResultsBean o : orders) {
                     o.setExpanded(false);
                 }
 
                 order.setExpanded(newExpandedState);
-                notifyDataSetChanged();
+                notifyDataSetChanged(); // refresh all items
 
                 if (listener != null) listener.onItemToggle(order);
             };
@@ -150,12 +165,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.ivexpandIcon.setOnClickListener(toggleListener);
             b.getRoot().setOnClickListener(toggleListener);
 
-
+            // ✅ Confirm Pickup button
             b.btnConfirmPickup.setOnClickListener(v -> {
                 if (listener != null) listener.onConfirmPickup(order);
             });
 
-
+            b.btnCancelPickup.setOnClickListener(v -> {
+                listener.onCancelPickup(order);
+            });
+            // ✅ Show "Select an Option" dialog
             b.tvSelectOption.setOnClickListener(v -> {
                 String[] options = {"Pickup", "Delivered"};
                 new android.app.AlertDialog.Builder(context)

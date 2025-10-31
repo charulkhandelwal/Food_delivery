@@ -3,109 +3,219 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data></data>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFF">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/titleOrders"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:drawableStart="@drawable/beg"
-                android:gravity="center_horizontal"
-                android:padding="10dp"
-                android:text="Orders"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/layoutNoOrders"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/titleOrders"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
-                    android:src="@drawable/logoorder" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="No New Orders"
-                    android:textColor="#333"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutOrderList"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/titleOrders"
-                android:layout_marginVertical="20dp"
-                android:orientation="vertical"
-                android:padding="8dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerOrders"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    tools:listitem="@layout/order_item"
-                    android:paddingBottom="12dp" />
-            </LinearLayout>
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/layoutMapTracking"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="110dp"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:background="#FFFFFF">
 
-            <FrameLayout
-                android:id="@+id/mapFragmentContainer"
+            <!-- 🔹 Order List Screen -->
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="match_parent"
+                android:id="@+id/layoutMain">
 
-            <TextView
-                android:id="@+id/tvMapSelectedAddress"
+                <TextView
+                    android:id="@+id/titleOrders"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:drawableStart="@drawable/beg"
+                    android:gravity="center_horizontal"
+                    android:padding="10dp"
+                    android:text="Orders"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/layoutNoOrders"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/titleOrders"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="24dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="220dp"
+                        android:layout_height="220dp"
+                        android:src="@drawable/logoorder" />
+
+                    <TextView
+                        android:id="@+id/nodata"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="No New Orders"
+                        android:textColor="#333"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutOrderList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/titleOrders"
+                    android:layout_marginVertical="20dp"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerOrders"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        android:paddingBottom="12dp"
+                        tools:listitem="@layout/order_item"
+                        android:visibility="visible" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- 🔹 Map + Details Screen -->
+            <LinearLayout
+                android:id="@+id/layoutMapTracking"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#EEEEEE"
-                android:padding="12dp"
-                android:text="\uD83D\uDCCD Tap map to select"
-                android:textColor="#000" />
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:background="#FFFFFF">
 
-            <Button
-                android:id="@+id/btnStart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:backgroundTint="#FF6B6B"
-                android:text="Start"
-                android:textAllCaps="false"
-                android:textColor="#FFF" />
-        </LinearLayout>
+                <!-- Back Button -->
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_margin="8dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_back"
+                    android:backgroundTint="@color/black" />
 
-    </FrameLayout>
+                <!-- Fixed Map Height -->
+                <FrameLayout
+                    android:id="@+id/mapFragmentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="#EEE"
+                    android:elevation="2dp" />
 
-</layout>
+                <!-- Address Info -->
+                <TextView
+                    android:id="@+id/tvMapSelectedAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#EEEEEE"
+                    android:padding="12dp"
+                    android:text="Restaurant: --"
+                    android:textColor="#000"
+                    android:textStyle="bold" />
+
+                <!-- Scrollable Details -->
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:dividerPadding="8dp">
+
+                        <!-- Restaurant Details -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Restaurant Details"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvRestaurantName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Name: -"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvRestaurantAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Address: -"
+                            android:layout_marginTop="2dp" />
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#DDD"
+                            android:layout_marginVertical="8dp" />
+
+                        <!-- Order Details -->
+                        <TextView
+                            android:text="Order Details"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvOrderId"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Order ID: -"
+                            android:layout_marginTop="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvOrderAmount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Amount: -"
+                            android:layout_marginTop="2dp" />
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#DDD"
+                            android:layout_marginVertical="8dp" />
+
+                        <!-- Delivery Details -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" Delivery Details"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvDeliveryAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Delivery Address: -"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </ScrollView>
+
+                <!-- Start Button -->
+                <Button
+                    android:id="@+id/btnStart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#FF6B6B"
+                    android:text="Start Delivery"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF" />
+            </LinearLayout>
+        </FrameLayout>
+
+    </layout>
+

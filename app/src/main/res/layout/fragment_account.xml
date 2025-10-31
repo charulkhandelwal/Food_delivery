@@ -149,6 +149,40 @@
                         tools:ignore="UseAppTint" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/rowOrderHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/option_item_bg">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/baseline_history_24"
+                        android:tint="@color/lightpink"
+                        tools:ignore="UseAppTint" />
+
+                    <TextView
+                        android:id="@+id/tvOrderHistory"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Order History"
+                        android:textSize="15sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/arrow"
+                        android:tint="@color/lightpink"
+                        tools:ignore="UseAppTint" />
+                </LinearLayout>
+
                 <!-- Allotted Area -->
                 <LinearLayout
                     android:id="@+id/rowAllottedArea"

@@ -16,9 +16,10 @@ public class splash extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ✅ Set splash screen layout
         setContentView(R.layout.activity_splash);
 
-
+        // ✅ Delay splash for 2 seconds before moving next
         new Handler().postDelayed(this::checkNextScreen, 2000);
     }
 

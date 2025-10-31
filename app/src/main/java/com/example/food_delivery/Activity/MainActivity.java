@@ -59,4 +59,11 @@ public class MainActivity extends AppCompatActivity {
         unselected.setBackgroundResource(R.drawable.bottom_unselected);
         unselected.setTextColor(getResources().getColor(android.R.color.black));
     }
+    @Override
+    public void onBackPressed() {
+        // Close the app instead of going back to login/signup
+        super.onBackPressed();
+        finishAffinity();
+    }
+
 }
