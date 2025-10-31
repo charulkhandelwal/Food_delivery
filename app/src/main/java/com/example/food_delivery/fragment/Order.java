@@ -474,7 +474,7 @@ public class Order extends Fragment {
     /**
      * 🚗 Draws driving route from restaurant to driver using Google Directions API
      */
-   /* private void drawRouteFromRestaurantToPartner(LatLng start, LatLng end) {
+    private void drawRouteFromRestaurantToPartner(LatLng start, LatLng end) {
         String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
                 + start.latitude + "," + start.longitude
                 + "&destination=" + end.latitude + "," + end.longitude
@@ -522,59 +522,8 @@ public class Order extends Fragment {
                 e.printStackTrace();
             }
         }).start();
-    }*/
-
-    private void drawRouteFromRestaurantToPartner(LatLng start, LatLng end) {
-        // OSRM API for driving directions (no API key needed)
-        String url = "https://router.project-osrm.org/route/v1/driving/"
-                + start.longitude + "," + start.latitude + ";"
-                + end.longitude + "," + end.latitude
-                + "?overview=full&geometries=polyline";
-
-        new Thread(() -> {
-            try {
-                URL directionsUrl = new URL(url);
-                HttpURLConnection conn = (HttpURLConnection) directionsUrl.openConnection();
-                conn.connect();
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) sb.append(line);
-                br.close();
-
-                JSONObject jsonObject = new JSONObject(sb.toString());
-                JSONArray routes = jsonObject.getJSONArray("routes");
-
-                if (routes.length() > 0) {
-                    JSONObject route = routes.getJSONObject(0);
-                    String points = route.getJSONObject("geometry").getString("coordinates");
-
-                    // OSRM gives polyline in "geometry" but if "geometries=polyline" is used, decode it
-                    String polyline = route.getString("geometry");
-                    List<LatLng> decodedPath = decodePoly(polyline);
-
-                    requireActivity().runOnUiThread(() -> {
-                        if (routePolyline != null) routePolyline.remove();
-                        routePolyline = liveGoogleMap.addPolyline(new PolylineOptions()
-                                .addAll(decodedPath)
-                                .color(Color.BLUE)
-                                .width(10f)
-                                .geodesic(true));
-
-                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                        builder.include(start);
-                        builder.include(end);
-                        liveGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
-                    });
-                } else {
-                    Log.e("ROUTE_ERROR", "No routes found in OSRM response");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
     }
+
 
     private List<LatLng> decodePoly(String encoded) {
         List<LatLng> poly = new ArrayList<>();

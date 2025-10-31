@@ -3,6 +3,7 @@ package com.example.food_delivery.Api;
 import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.DocumentResponse;
+import com.example.food_delivery.Model.OrderHistoryResponse;
 import com.example.food_delivery.Model.OrderModel;
 import com.example.food_delivery.Model.GetProfileResponse;
 import com.example.food_delivery.Model.OtpResponse;
@@ -91,5 +92,8 @@ public interface OtpApi {
             @Header("Authorization") String token,
             @Body Map<String, String> body
     );
+
+    @GET("delivery-partner/orders/history")
+    Call<OrderHistoryResponse> getHistory(@Header("Authorization") String bearerToekn);
 
 }

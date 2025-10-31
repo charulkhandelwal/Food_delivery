@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.food_delivery.Activity.EditProfileActivity;
+import com.example.food_delivery.Activity.OrderHistoryAcitivity;
 import com.example.food_delivery.Activity.Refer_win;
 import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
@@ -38,6 +39,11 @@ public class Account extends Fragment {
         // Edit Profile
         binding.rowEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), EditProfileActivity.class);
+            startActivity(intent);
+        });
+
+        binding.tvOrderHistory.setOnClickListener(v->{
+            Intent intent = new Intent(getActivity(), OrderHistoryAcitivity.class);
             startActivity(intent);
         });
 
