@@ -2,6 +2,7 @@ package com.example.food_delivery.Api;
 
 import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
+import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.Model.DocumentResponse;
 import com.example.food_delivery.Model.OrderHistoryResponse;
 import com.example.food_delivery.Model.OrderModel;
@@ -19,12 +20,12 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.PartMap;
 
 public interface OtpApi {
     @Headers("Content-Type: application/json")
@@ -52,35 +53,19 @@ public interface OtpApi {
             @Part MultipartBody.Part profile  // the profile image
     );
 
-  /*  @Headers("Content-Type: application/json")
-    @Multipart("Documents")
-    Call<DocumentResponse>documents(@Body Map<String, String> body);*/
+    @GET("delivery-partner/documents")
+    Call<DocumentGetResponse> getdocuments();
+
 
     @Multipart
-    @POST("delivery-partner/documents")
+    @PUT("delivery-partner/documents")
     Call<DocumentResponse> uploadDocuments(
-            // Aadhaar
-            @Part MultipartBody.Part aadhaarFront,
-            @Part MultipartBody.Part aadhaarBack,
-
-
-            @Part MultipartBody.Part panFront,
-            @Part MultipartBody.Part panBack,
-
-
-            @Part MultipartBody.Part drivingLicenseFront,
-            @Part MultipartBody.Part drivingLicenseBack,
-
-
-            @Part MultipartBody.Part rcFront,
-            @Part MultipartBody.Part rcBack,
-
-
-            @Part("accountNumber") RequestBody accountNumber,
-            @Part("ifscCode") RequestBody ifscCode,
-            @Part("name") RequestBody name
-
+            @PartMap Map<String, RequestBody> formFields,
+            @Part List<MultipartBody.Part> files
     );
+
+
+
 
     @GET("delivery-partner/orders/active")
     Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
@@ -95,5 +80,6 @@ public interface OtpApi {
 
     @GET("delivery-partner/orders/history")
     Call<OrderHistoryResponse> getHistory(@Header("Authorization") String bearerToekn);
+
 
 }

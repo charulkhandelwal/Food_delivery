@@ -11,12 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.food_delivery.Activity.EditProfileActivity;
 import com.example.food_delivery.Activity.OrderHistoryAcitivity;
 import com.example.food_delivery.Activity.Refer_win;
 import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.FragmentAccountBinding;
+
+import java.io.File;
 
 public class Account extends Fragment {
 
@@ -63,13 +66,30 @@ public class Account extends Fragment {
     }
 
     private void logoutUser() {
-
+        // Clear saved documents
         DocumentPrefs.clearAll(requireContext());
 
+        // Clear Glide cache (optional but prevents old images showing)
+        new Thread(() -> {
+            try {
+                Glide.get(requireContext()).clearDiskCache();
+            } catch (Exception ignored) {}
+        }).start();
+        Glide.get(requireContext()).clearMemory();
+
+        // Delete internal temp files (docs folder)
+        File docsDir = new File(requireContext().getFilesDir(), "docs");
+        if (docsDir.exists() && docsDir.isDirectory()) {
+            for (File f : docsDir.listFiles()) {
+                f.delete();
+            }
+        }
+
+        // Navigate to signup
         Intent intent = new Intent(requireContext(), Sign_up.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-
         requireActivity().finish();
     }
+
 }

@@ -25,17 +25,16 @@ public class splash extends AppCompatActivity {
 
     private void checkNextScreen() {
         Log.e("tannu", "bhbvghjdfg");
-        String token = DocumentPrefs.getToken(this);
+       /* String token = DocumentPrefs.getToken(this);
 
-       /* if (token == null || token.isEmpty()) {
-            // 🔹 User not logged in → OTP screen
+        if (token == null || token.isEmpty()) {
+
             startActivity(new Intent(this, Sign_up.class));
         } else {
-            // 🔹 Already logged in → MainActivity
+
             startActivity(new Intent(this, MainActivity.class));
         }*/
         startActivity(new Intent(this, Sign_up.class));
-
         finish();
     }
 }

@@ -3,6 +3,7 @@ package com.example.food_delivery.Activity;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,9 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.food_delivery.Api.ApiClient;
@@ -47,34 +50,123 @@ public class Personal_informationActivity extends AppCompatActivity {
     private ActivityPersonalInformationBinding binding;
     private static final int CAMERA_REQUEST = 1001;
     private static final int GALLERY_REQUEST = 1002;
-
     private Bitmap selectedProfileImage = null;
     private JSONArray citiesArray;
-
 
     private final List<String> validBloodGroups = Arrays.asList(
             "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"
     );
+
+    private ActivityResultLauncher<Intent> cameraLauncher;
+    private ActivityResultLauncher<Intent> galleryLauncher;
+    private ActivityResultLauncher<String> permissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
-        if (DocumentPrefs.getProfile(this) != null) {
-            startActivity(new Intent(this, Document_Activity.class));
-            finish();
-            return;
-        }
-
         binding = ActivityPersonalInformationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        initLaunchers();
 
         binding.etDob.setOnClickListener(v -> showDatePicker());
         binding.btnUpload.setOnClickListener(v -> showImagePicker());
         binding.btnSubmit.setOnClickListener(v -> submitProfileMultipart());
 
         loadCitiesData();
+
+       /* if (DocumentPrefs.getProfile(this) != null) {
+            startActivity(new Intent(this, Document_Activity.class));
+            finish();
+            return;
+        }*/
+
+    }
+
+    private void initLaunchers() {
+
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Bundle extras = result.getData().getExtras();
+                        if (extras != null) {
+                            selectedProfileImage = (Bitmap) extras.get("data");
+                            binding.ivProfile.setImageBitmap(selectedProfileImage);
+                        }
+                    }
+                });
+
+
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri selectedImageUri = result.getData().getData();
+                        try {
+                            selectedProfileImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                            binding.ivProfile.setImageBitmap(selectedProfileImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+        permissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        openCamera();
+                    } else {
+                        Toast.makeText(this, "Camera permission denied!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void showImagePicker() {
+        String[] options = {"Camera", "Gallery"};
+        new AlertDialog.Builder(this)
+                .setTitle("Select Image")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        checkCameraPermission();
+                    } else {
+                        openGallery();
+                    }
+                }).show();
+    }
+
+    private void checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void openCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraLauncher.launch(cameraIntent);
+    }
+
+    private void openGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        galleryLauncher.launch(galleryIntent);
+    }
+
+    private void showDatePicker() {
+        final Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(
+                this,
+                (DatePicker view, int year, int month, int dayOfMonth) ->
+                        binding.etDob.setText(dayOfMonth + "-" + (month + 1) + "-" + year),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        ).show();
     }
 
     private void loadCitiesData() {
@@ -120,7 +212,6 @@ public class Personal_informationActivity extends AppCompatActivity {
         if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); return; }
         if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); return; }
 
-
         if (bloodGroupStr.isEmpty()) {
             binding.etBloodGroup.setError("Blood group required");
             return;
@@ -135,7 +226,6 @@ public class Personal_informationActivity extends AppCompatActivity {
 
         Log.d("PROFILE_DEBUG", "firstName: " + firstNameStr);
         Log.d("PROFILE_DEBUG", "bloodGroup: " + bloodGroupStr);
-
 
         RequestBody firstName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), firstNameStr);
         RequestBody lastName = RequestBody.create(okhttp3.MediaType.parse("text/plain"), lastNameStr);
@@ -171,13 +261,10 @@ public class Personal_informationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ProfileModel> call, Response<ProfileModel> response) {
                 if (response.isSuccessful() && response.body() != null) {
-
                     String profileJson = new Gson().toJson(response.body());
                     DocumentPrefs.saveProfile(Personal_informationActivity.this, profileJson);
-
                     Toast.makeText(Personal_informationActivity.this,
                             "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-
 
                     startActivity(new Intent(Personal_informationActivity.this, Document_Activity.class));
                     finish();
@@ -193,71 +280,5 @@ public class Personal_informationActivity extends AppCompatActivity {
                 Toast.makeText(Personal_informationActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void showDatePicker() {
-        final Calendar calendar = Calendar.getInstance();
-        new DatePickerDialog(
-                this,
-                (DatePicker view, int year, int month, int dayOfMonth) ->
-                        binding.etDob.setText(dayOfMonth + "-" + (month + 1) + "-" + year),
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        ).show();
-    }
-
-    private void showImagePicker() {
-        String[] options = {"Camera", "Gallery"};
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("Select Image")
-                .setItems(options, (dialog, which) -> {
-                    if (which == 0) {
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
-                        } else {
-                            openCamera();
-                        }
-                    } else {
-                        openGallery();
-                    }
-                }).show();
-    }
-
-    private void openCamera() {
-        startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), CAMERA_REQUEST);
-    }
-
-    private void openGallery() {
-        startActivityForResult(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), GALLERY_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            if (requestCode == CAMERA_REQUEST) {
-                selectedProfileImage = (Bitmap) data.getExtras().get("data");
-                binding.ivProfile.setImageBitmap(selectedProfileImage);
-            } else if (requestCode == GALLERY_REQUEST) {
-                Uri selectedImageUri = data.getData();
-                try {
-                    selectedProfileImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
-                    binding.ivProfile.setImageBitmap(selectedProfileImage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA_REQUEST && grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            openCamera();
-        }
     }
 }
