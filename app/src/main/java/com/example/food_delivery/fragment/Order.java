@@ -1,5 +1,7 @@
 package com.example.food_delivery.fragment;
 
+import static androidx.graphics.shapes.Utils.distance;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
@@ -27,6 +29,7 @@ import com.example.food_delivery.Api.ApiClient;
 import com.example.food_delivery.Api.OtpApi;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.OrderModel;
+import com.example.food_delivery.Model.ReachedRestaurantModel;
 import com.example.food_delivery.R;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.Socket.SocketManager;
@@ -65,6 +68,7 @@ import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 import android.view.animation.Interpolator;
 
 public class Order extends Fragment {
@@ -119,7 +123,6 @@ public class Order extends Fragment {
         //  Listen for new orders
         socket.on("new_order", onNewOrderReceived);
 
-
         //  Connect socket AFTER listeners are attached
         socketManager.connect();
 
@@ -133,6 +136,7 @@ public class Order extends Fragment {
     }
 
     private void callData() {
+        setupReachedButton();
         // ✅ Setup persistent map fragment
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragmentContainer);
         if (mapFragment == null) {
@@ -181,7 +185,112 @@ public class Order extends Fragment {
             Toast.makeText(requireContext(), "🛑 Tracking stopped", Toast.LENGTH_SHORT).show();
         });
 
+        binding.btnReached.setOnClickListener(v -> {
+            setupReachedButton();
+        });
 
+        binding.btnDeliverToUser.setOnClickListener(v->{
+            callPickedOrderFromRestaurantApi();
+        });
+
+
+    }
+
+    private void setupReachedButton() {
+
+        binding.btnReached.setOnClickListener(v -> {
+            if (binding.btnReached.isEnabled()) {
+                callReachedApi();
+            } else {
+                Toast.makeText(requireContext(), "You're not close enough to the restaurant yet.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void callReachedApi() {
+        OtpApi api = ApiClient.getClient().create(OtpApi.class);
+        String token = DocumentPrefs.getToken(requireContext());
+
+        String orderId = selectedOrder.get_id();
+        Log.d("REACHED_API", "📦 Sending Order ID: " + orderId);
+
+        if (orderId == null || orderId.isEmpty()) {
+            Toast.makeText(requireContext(), "❌ Order ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("orderId", orderId); // or "order_id" if your backend expects it
+
+        Call<ReachedRestaurantModel> call = api.reachedRestaurant("Bearer " + token, body);
+        call.enqueue(new Callback<ReachedRestaurantModel>() {
+            @Override
+            public void onResponse(Call<ReachedRestaurantModel> call, Response<ReachedRestaurantModel> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ReachedRestaurantModel result = response.body();
+
+                    if (result.isSuccess()) {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                        binding.btnStart.setVisibility(View.GONE);
+                        binding.btnReached.setVisibility(View.GONE);
+                        binding.btnDeliverToUser.setVisibility(View.VISIBLE);
+                    } else {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReachedRestaurantModel> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void callPickedOrderFromRestaurantApi() {
+        OtpApi api = ApiClient.getClient().create(OtpApi.class);
+        String token = DocumentPrefs.getToken(requireContext());
+
+        String orderId = selectedOrder.get_id();
+        Log.d("PickedOrderFromRestaurant", "📦 Sending Order ID: " + orderId);
+
+        if (orderId == null || orderId.isEmpty()) {
+            Toast.makeText(requireContext(), "❌ Order ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("orderId", orderId); // or "order_id" if your backend expects it
+
+        Call<ReachedRestaurantModel> call = api.pickedOrderFromRestaurant("Bearer " + token, body);
+        call.enqueue(new Callback<ReachedRestaurantModel>() {
+            @Override
+            public void onResponse(Call<ReachedRestaurantModel> call, Response<ReachedRestaurantModel> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ReachedRestaurantModel result = response.body();
+
+                    if (result.isSuccess()) {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                        binding.btnStart.setVisibility(View.GONE);
+                        binding.btnReached.setVisibility(View.GONE);
+                        binding.btnDeliverToUser.setVisibility(View.VISIBLE);
+                    } else {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReachedRestaurantModel> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadActiveOrders() {
@@ -585,6 +694,7 @@ public class Order extends Fragment {
 
                     Log.d(TAG, "📍 Live GPS: " + lat + ", " + lng);
 
+
                     LatLng newLatLng = new LatLng(lat, lng);
                     // 🚴 If not moved
                     if (lastLatLng != null && distanceBetween(lastLatLng, newLatLng) < 3) { // within 3 meters
@@ -610,6 +720,16 @@ public class Order extends Fragment {
                     // 🧮 Log live distance (optional)
                     float distance = calculateDistance(lat, lng, restaurantLatLng.latitude, restaurantLatLng.longitude);
                     Log.d("MAP_TRACKING", "🚴 Distance to restaurant: " + distance + " meters");
+
+                    if (distance < 5)  {
+                        // Within 5 meters — enable button
+                        binding.btnReached.setEnabled(true);
+                        binding.btnReached.setAlpha(1f);
+                    } else {
+                        // Too far — keep disabled
+                        binding.btnReached.setEnabled(false);
+                        binding.btnReached.setAlpha(0.5f);
+                    }
 
                 }
 
@@ -672,7 +792,6 @@ public class Order extends Fragment {
     }
 
 
-
     // ✅ Emit live location to socket
     private void sendSelectedLocationToSocket(double lat, double lng) {
         try {
@@ -699,14 +818,6 @@ public class Order extends Fragment {
     }
 
 
-    // ✅ Stop location updates when needed (e.g., on delivery complete or fragment closed)
-    private void stopLocationUpdates() {
-        if (fusedLocationClient != null && locationCallback != null) {
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-            isUpdating = false;
-            Log.d(TAG, "🛑 Location updates stopped");
-        }
-    }
 
     private void callAcceptORRejctApi(String status, String orderId) {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
@@ -719,6 +830,7 @@ public class Order extends Fragment {
         Log.e("token", "📤 Token → " + token);
 
         Call<AcceptRejectOrderModel> call = api.updateAcceptRejectOrder(token, body);
+        Log.e("API_NAME", "🔗 Endpoint: " + call.request().url());
         call.enqueue(new Callback<AcceptRejectOrderModel>() {
             @Override
             public void onResponse(Call<AcceptRejectOrderModel> call, Response<AcceptRejectOrderModel> response) {
@@ -790,4 +902,29 @@ public class Order extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+    // ✅ Stop location updates when needed (e.g., on delivery complete or fragment closed)
+    private void stopLocationUpdates() {
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+            Log.d(TAG, "🛑 Location updates stopped.");
+        }
+
+        // Reset tracking flags
+        isUpdating = false;
+        lastLatLng = null;
+        locationCallback = null;
+
+        // Optionally clear the map elements if still visible
+        if (liveGoogleMap != null) {
+            if (partnerMarker != null) {
+                partnerMarker.remove();
+                partnerMarker = null;
+            }
+            if (routePolyline != null) {
+                routePolyline.remove();
+                routePolyline = null;
+            }
+        }
+    }
+
 }

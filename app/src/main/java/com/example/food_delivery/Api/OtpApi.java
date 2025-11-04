@@ -10,6 +10,7 @@ import com.example.food_delivery.Model.GetProfileResponse;
 import com.example.food_delivery.Model.OtpResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.Model.ProfileModel;
+import com.example.food_delivery.Model.ReachedRestaurantModel;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -64,9 +66,6 @@ public interface OtpApi {
             @Part List<MultipartBody.Part> files
     );
 
-
-
-
     @GET("delivery-partner/orders/active")
     Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
     @GET("delivery-partner/profile")
@@ -81,5 +80,17 @@ public interface OtpApi {
     @GET("delivery-partner/orders/history")
     Call<OrderHistoryResponse> getHistory(@Header("Authorization") String bearerToekn);
 
+
+    @POST("delivery-partner/orders/reached-restaurant")
+    Call<ReachedRestaurantModel> reachedRestaurant(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/picked-order")
+    Call<ReachedRestaurantModel> pickedOrderFromRestaurant(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
 
 }

@@ -214,6 +214,39 @@
                     android:text="Start Delivery"
                     android:textAllCaps="false"
                     android:textColor="#FFF" />
+
+                <!-- Reached + Deliver Buttons -->
+                <LinearLayout
+                    android:id="@+id/llView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btnReached"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:backgroundTint="#FFA500"
+                        android:text="Reached"
+                        android:textAllCaps="false"
+                        android:textColor="#FFF" />
+
+                    <Button
+                        android:id="@+id/btnDeliverToUser"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="#4CAF50"
+                        android:text="Deliver to User"
+                        android:textAllCaps="false"
+                        android:textColor="#FFF" />
+                </LinearLayout>
             </LinearLayout>
         </FrameLayout>
 
