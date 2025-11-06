@@ -36,9 +36,11 @@ public class OrderModel {
         private String createdAt;
         private String updatedAt;
         private int __v;
+        private boolean driverReachedRestaurant;
         private RestaurantDataBean restaurantData;
         private List<DishesBean> dishes;
         private UserData userData;
+        private DeliveryAddress deliveryAddress;
 
         // ✅ Local fields
         private transient boolean isNew = true;
@@ -110,11 +112,17 @@ public class OrderModel {
         public int get__v() { return __v; }
         public void set__v(int __v) { this.__v = __v; }
 
+        public boolean getdriverReachedRestaurant() { return driverReachedRestaurant; }
+        public void setdriverReachedRestaurant(boolean driverReachedRestaurant) { this.driverReachedRestaurant = driverReachedRestaurant; }
+
         public RestaurantDataBean getRestaurantData() { return restaurantData; }
         public void setRestaurantData(RestaurantDataBean restaurantData) { this.restaurantData = restaurantData; }
 
         public UserData getUserData() { return userData; }
         public void setUserData(UserData userData) { this.userData = userData; }
+
+        public DeliveryAddress getDeliveryAddressData() { return deliveryAddress; }
+        public void setDeliveryAddressData(DeliveryAddress deliveryAddress) { this.deliveryAddress = deliveryAddress; }
 
         public List<DishesBean> getDishes() { return dishes; }
         public void setDishes(List<DishesBean> dishes) { this.dishes = dishes; }
@@ -392,6 +400,17 @@ public class OrderModel {
             public List<Double> getCoordinates() { return coordinates; }
             public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
         }
+        public static class DeliveryAddress {
+            private String type;
+            private List<Double> coordinates;
+
+            public String getType() { return type; }
+            public void setType(String type) { this.type = type; }
+
+            public List<Double> getCoordinates() { return coordinates; }
+            public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
+        }
+
 
     }
 }

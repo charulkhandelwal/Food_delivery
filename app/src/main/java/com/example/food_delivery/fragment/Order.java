@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.food_delivery.Adapter.OrderAdapter;
 import com.example.food_delivery.Api.ApiClient;
@@ -91,6 +92,7 @@ public class Order extends Fragment {
     private GoogleMap liveGoogleMap;
     private LatLng lastLatLng; // 🆕 For movement check
     private Polyline routePolyline;
+    private String currentMapMode = "restaurant"; // or "user"
 
 
     @Nullable
@@ -109,7 +111,8 @@ public class Order extends Fragment {
         //  Attach connect listener (emit location only after connected)
         socket.on(Socket.EVENT_CONNECT, args -> {
             Log.d(TAG, "✅ Socket connected, now sending initial location...");
-            sendSelectedLocationToSocket(25.4891177, 74.3300726);
+            sendSelectedLocationToSocket(26.8456073, 75.8047004);
+//            startLocationUpdates();
         });
 
         socket.on(Socket.EVENT_CONNECT_ERROR, args -> {
@@ -136,7 +139,17 @@ public class Order extends Fragment {
     }
 
     private void callData() {
+
+        binding.swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadActiveOrders();
+            }
+        });
+        binding.btnPicked.setEnabled(false);
+
         setupReachedButton();
+
         // ✅ Setup persistent map fragment
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapFragmentContainer);
         if (mapFragment == null) {
@@ -189,10 +202,60 @@ public class Order extends Fragment {
             setupReachedButton();
         });
 
-        binding.btnDeliverToUser.setOnClickListener(v->{
-            callPickedOrderFromRestaurantApi();
+        binding.btnPicked.setOnClickListener(v -> {
+            setupPickedOrder();
+
+        });
+        binding.btnDeliveryComplete.setOnClickListener(v -> {
+            setupDeliveryCompelete();
         });
 
+
+    }
+
+    private void setupDeliveryCompelete() {
+        if (selectedOrder.isFromSocket()) {
+            // ✅ Order came from socket → only emit event
+            emitDeliveredOrderResponseSocket(selectedOrder.getOrderId());
+            Toast.makeText(requireContext(), "✅ Accepted via Socket", Toast.LENGTH_SHORT).show();
+            Log.e("delivered socket hit", "123");
+
+        } else {
+            // ✅ Order came from API → hit accept API
+            Log.e("delivered api hit", "123");
+            Toast.makeText(requireContext(), "✅ Accepted via api", Toast.LENGTH_SHORT).show();
+            callDeliveredCompleteHitApi();
+        }
+
+
+        stopLocationUpdates();
+        isMapOpen = false;
+        isUpdating = false;
+        loadActiveOrders();
+        binding.recyclerOrders.setVisibility(View.VISIBLE);
+        binding.layoutMapTracking.setVisibility(View.GONE);
+    }
+
+
+    private void setupPickedOrder() {
+        if (selectedOrder.isFromSocket()) {
+            // ✅ Order came from socket → only emit event
+            emitPicketOrderResponseSocket(selectedOrder.getOrderId());
+            Toast.makeText(requireContext(), "✅ Accepted via Socket", Toast.LENGTH_SHORT).show();
+            Log.e("socket hit", "123");
+
+        } else {
+            // ✅ Order came from API → hit accept API
+            Log.e("api hit", "123");
+            Toast.makeText(requireContext(), "✅ Accepted via api", Toast.LENGTH_SHORT).show();
+            callPickedOrderFromRestaurantApi();
+        }
+        // ✅ After pickup, switch map mode to "user"
+        currentMapMode = "user";
+
+        openMapForRestaturantToUserCorrdinates(selectedOrder);
+        binding.llView.setVisibility(View.GONE);
+        binding.btnDeliveryComplete.setVisibility(View.VISIBLE);
 
     }
 
@@ -200,17 +263,71 @@ public class Order extends Fragment {
 
         binding.btnReached.setOnClickListener(v -> {
             if (binding.btnReached.isEnabled()) {
-                callReachedApi();
+                if (selectedOrder.isFromSocket()) {
+                    // ✅ Order came from socket → only emit event
+                    emitReachedResponseSocket(selectedOrder.getOrderId());
+                    Toast.makeText(requireContext(), "✅ Accepted via Socket", Toast.LENGTH_SHORT).show();
+                    Log.e("socket hit", "123");
+
+                } else {
+                    // ✅ Order came from API → hit accept API
+                    Log.e("api hit", "123");
+                    Toast.makeText(requireContext(), "✅ Accepted via api", Toast.LENGTH_SHORT).show();
+                    callReachedApi();
+                }
+
+                binding.btnPicked.setEnabled(true);
+
             } else {
                 Toast.makeText(requireContext(), "You're not close enough to the restaurant yet.", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+    private void callDeliveredCompleteHitApi() {
+        OtpApi api = ApiClient.getClient().create(OtpApi.class);
+        String token = DocumentPrefs.getToken(requireContext());
+
+        String orderId = selectedOrder.getOrderId();
+        Log.d("Delivered api", "📦 Sending Order ID: " + orderId);
+
+        if (orderId == null || orderId.isEmpty()) {
+            Toast.makeText(requireContext(), "❌ Order ID is missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("orderId", orderId);
+
+        Call<ReachedRestaurantModel> call = api.deliveredOrder("Bearer " + token, body);
+        call.enqueue(new Callback<ReachedRestaurantModel>() {
+            @Override
+            public void onResponse(Call<ReachedRestaurantModel> call, Response<ReachedRestaurantModel> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ReachedRestaurantModel result = response.body();
+
+                    if (result.isSuccess()) {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReachedRestaurantModel> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
     private void callReachedApi() {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
         String token = DocumentPrefs.getToken(requireContext());
 
-        String orderId = selectedOrder.get_id();
+        String orderId = selectedOrder.getOrderId();
         Log.d("REACHED_API", "📦 Sending Order ID: " + orderId);
 
         if (orderId == null || orderId.isEmpty()) {
@@ -232,7 +349,7 @@ public class Order extends Fragment {
                         Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
                         binding.btnStart.setVisibility(View.GONE);
                         binding.btnReached.setVisibility(View.GONE);
-                        binding.btnDeliverToUser.setVisibility(View.VISIBLE);
+                        binding.btnPicked.setVisibility(View.VISIBLE);
                     } else {
                         Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -254,7 +371,7 @@ public class Order extends Fragment {
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
         String token = DocumentPrefs.getToken(requireContext());
 
-        String orderId = selectedOrder.get_id();
+        String orderId = selectedOrder.getOrderId();
         Log.d("PickedOrderFromRestaurant", "📦 Sending Order ID: " + orderId);
 
         if (orderId == null || orderId.isEmpty()) {
@@ -276,7 +393,7 @@ public class Order extends Fragment {
                         Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
                         binding.btnStart.setVisibility(View.GONE);
                         binding.btnReached.setVisibility(View.GONE);
-                        binding.btnDeliverToUser.setVisibility(View.VISIBLE);
+                        binding.btnPicked.setVisibility(View.VISIBLE);
                     } else {
                         Toast.makeText(requireContext(), result.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -303,6 +420,7 @@ public class Order extends Fragment {
         String token = DocumentPrefs.getToken(requireContext());
 
         Call<OrderModel> call = api.getActivOrders("Bearer " + token);
+        Log.d("ActiveOrderAPI", "📤 API Call Created: " + call.request().url());
         call.enqueue(new Callback<OrderModel>() {
             @Override
             public void onResponse(Call<OrderModel> call, Response<OrderModel> response) {
@@ -316,7 +434,10 @@ public class Order extends Fragment {
                         binding.layoutNoOrders.setVisibility(View.GONE);
                         binding.layoutOrderList.setVisibility(View.VISIBLE);
                     }
+                    binding.swipeRefreshLayout.setRefreshing(false);
                     setupAdapter();
+                    Log.e("sucess active order api", response.message());
+
                 } else {
                     Log.e("API_RESPONSE_CODE", "Code: " + response.code());
                     try {
@@ -396,6 +517,29 @@ public class Order extends Fragment {
                         newOrder.setRestaurantData(restData);
                     }
 
+                    // ✅ Correct parsing for nested location
+                    JSONObject userLoc = obj.optJSONObject("userAddress");
+                    if (userLoc != null) {
+                        JSONObject location = userLoc.optJSONObject("location");
+                        if (location != null) {
+                            JSONArray coordinatesArray = location.optJSONArray("coordinates");
+                            if (coordinatesArray != null && coordinatesArray.length() >= 2) {
+                                double lng = coordinatesArray.optDouble(0, 0.0);
+                                double lat = coordinatesArray.optDouble(1, 0.0);
+
+                                OrderModel.ResultsBean.DeliveryAddress deliveryAddress = new OrderModel.ResultsBean.DeliveryAddress();
+                                List<Double> coordinates = new ArrayList<>();
+                                coordinates.add(lng);
+                                coordinates.add(lat);
+                                deliveryAddress.setType(location.optString("type", "Point"));
+                                deliveryAddress.setCoordinates(coordinates);
+
+                                newOrder.setDeliveryAddressData(deliveryAddress);
+                            }
+                        }
+                    }
+
+
                     // Add message as dummy price or info if needed
                     newOrder.setPaymentStatus(obj.optString("message", ""));
 
@@ -409,9 +553,6 @@ public class Order extends Fragment {
                     } else {
                         setupAdapter();
                     }
-
-                    // 🌀 Optionally refresh via API to sync all
-//                    loadActiveOrders();
 
                     Toast.makeText(requireContext(), "🆕 " + obj.optString("message", "New order received!"), Toast.LENGTH_SHORT).show();
                 } else {
@@ -436,9 +577,10 @@ public class Order extends Fragment {
 
                     if (selectedOrder.isFromSocket()) {
                         // ✅ Order came from socket → only emit event
-                        emitOrderResponseSocket(selectedOrder.get_id(), "accepted");
+                        emitOrderResponseSocket(selectedOrder.getOrderId(), "accepted");
                         Toast.makeText(requireContext(), "✅ Accepted via Socket", Toast.LENGTH_SHORT).show();
                         Log.e("socket hit", "123");
+                        Log.e("orderId", selectedOrder.getOrderId());
 
                         // ✅ Now open map only after accepted confirmation
                         openMapIfCoordinatesExist(order);
@@ -448,13 +590,13 @@ public class Order extends Fragment {
                         // ✅ Order came from API → hit accept API
                         Log.e("api hit", "123");
                         Toast.makeText(requireContext(), "✅ Accepted via api", Toast.LENGTH_SHORT).show();
-                        callAcceptORRejctApi("accepted", selectedOrder.get_id());
+                        callAcceptORRejctApi("accepted", selectedOrder.getOrderId());
                     }
                     setOrderDetailsData(selectedOrder);
 
                 } else
                     Toast.makeText(requireContext(), "Select an order first", Toast.LENGTH_SHORT).show();
-//                showOrderDetail(order);
+
             }
 
             @Override
@@ -462,10 +604,10 @@ public class Order extends Fragment {
                 selectedOrder = order;
                 if (selectedOrder != null) {
                     if (selectedOrder.isFromSocket()) {
-                        emitOrderResponseSocket(selectedOrder.get_id(), "rejected");
+                        emitOrderResponseSocket(selectedOrder.getOrderId(), "rejected");
                         Toast.makeText(requireContext(), "❌ Rejected via Socket", Toast.LENGTH_SHORT).show();
                     } else {
-                        callAcceptORRejctApi("rejected", selectedOrder.get_id());
+                        callAcceptORRejctApi("rejected", selectedOrder.getOrderId());
                     }
                 } else {
                     Toast.makeText(requireContext(), "Select an order first", Toast.LENGTH_SHORT).show();
@@ -524,6 +666,9 @@ public class Order extends Fragment {
             Log.e("restaurant long", String.valueOf(restaurantLng));
             Log.e("restaurant lat", String.valueOf(restaurantLat));
 
+            currentMapMode = "restaurant";
+            openMapForSelectedOrder(restaurantLat, restaurantLng);
+
             openMapForSelectedOrder(restaurantLat, restaurantLng);
         } else {
             Log.e("OrderDebug", "⚠️ Missing restaurant coordinates — skipping map open.");
@@ -531,9 +676,38 @@ public class Order extends Fragment {
         }
     }
 
+    private void openMapForRestaturantToUserCorrdinates(OrderModel.ResultsBean order) {
+        if (liveGoogleMap == null) return;
+
+        // 🧹 Clear old map data
+        liveGoogleMap.clear();
+        routePolyline = null;
+        partnerMarker = null;
+
+        double userLat = 0.0;
+        double userLng = 0.0;
+
+        if (order != null &&
+                order.getDeliveryAddressData() != null &&
+                order.getDeliveryAddressData().getCoordinates() != null &&
+                order.getDeliveryAddressData().getCoordinates().size() >= 2) {
+
+            List<Double> userCoordinates = order.getDeliveryAddressData().getCoordinates();
+            userLng = userCoordinates.get(0);
+            userLat = userCoordinates.get(1);
+
+            Log.e("UserCoords", "✅ Using provided coordinates → Lat: " + userLat + ", Lng: " + userLng);
+        } else {
+            Log.e("UserCoords", "⚠️ Missing user coordinates — using default (0.0, 0.0)");
+        }
+
+        // ✅ Open map even with default coordinates
+        currentMapMode = "user";
+        openMapForSelectedOrder(userLat, userLng);
+    }
 
     @SuppressLint("MissingPermission")
-    private void openMapForSelectedOrder(double restaurantLat, double restaurantLng) {
+    private void openMapForSelectedOrder(double destinationLat, double destinationLng) {
         isMapOpen = true;
         binding.layoutOrderList.setVisibility(View.GONE);
         binding.layoutMapTracking.setVisibility(View.VISIBLE);
@@ -544,40 +718,43 @@ public class Order extends Fragment {
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
                     selectedLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    restaurantLatLng = new LatLng(restaurantLat, restaurantLng);
+                    LatLng destinationLatLng = new LatLng(destinationLat, destinationLng);
 
                     googleMap.clear();
 
-                    // 🟦 Add Delivery Partner Marker
+                    // 🟦 Delivery Partner Marker
                     partnerMarker = googleMap.addMarker(new MarkerOptions()
                             .position(selectedLatLng)
                             .title("🚴 Delivery Partner")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 
-                    // 🟥 Add Restaurant Marker
+                    // 🟥 Destination Marker (Restaurant or User)
                     googleMap.addMarker(new MarkerOptions()
-                            .position(restaurantLatLng)
-                            .title("📍 Restaurant Location")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                            .position(destinationLatLng)
+                            .title(currentMapMode.equals("restaurant") ? "📍 Restaurant" : "🏠 Delivery Location")
+                            .icon(BitmapDescriptorFactory.defaultMarker(
+                                    currentMapMode.equals("restaurant")
+                                            ? BitmapDescriptorFactory.HUE_RED
+                                            : BitmapDescriptorFactory.HUE_GREEN
+                            )));
 
-                    drawRouteFromRestaurantToPartner(selectedLatLng, restaurantLatLng);
+                    drawRouteFromRestaurantToPartner(selectedLatLng, destinationLatLng);
 
-                    // 🧭 Zoom camera to include both points
+                    // 🧭 Fit both markers in view
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
                     builder.include(selectedLatLng);
-                    builder.include(restaurantLatLng);
+                    builder.include(destinationLatLng);
                     LatLngBounds bounds = builder.build();
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
 
-                    // Enable My Location
                     googleMap.setMyLocationEnabled(true);
-
                 } else {
                     Toast.makeText(requireContext(), "Unable to get partner location", Toast.LENGTH_SHORT).show();
                 }
             });
         });
     }
+
 
     /**
      * 🚗 Draws driving route from restaurant to driver using Google Directions API
@@ -694,7 +871,7 @@ public class Order extends Fragment {
 
                     Log.d(TAG, "📍 Live GPS: " + lat + ", " + lng);
 
-
+//                    sendSelectedLocationToSocket(lat, lng);
                     LatLng newLatLng = new LatLng(lat, lng);
                     // 🚴 If not moved
                     if (lastLatLng != null && distanceBetween(lastLatLng, newLatLng) < 3) { // within 3 meters
@@ -721,7 +898,7 @@ public class Order extends Fragment {
                     float distance = calculateDistance(lat, lng, restaurantLatLng.latitude, restaurantLatLng.longitude);
                     Log.d("MAP_TRACKING", "🚴 Distance to restaurant: " + distance + " meters");
 
-                    if (distance < 5)  {
+                    if (distance < 10) {
                         // Within 5 meters — enable button
                         binding.btnReached.setEnabled(true);
                         binding.btnReached.setAlpha(1f);
@@ -791,7 +968,6 @@ public class Order extends Fragment {
         });
     }
 
-
     // ✅ Emit live location to socket
     private void sendSelectedLocationToSocket(double lat, double lng) {
         try {
@@ -816,7 +992,6 @@ public class Order extends Fragment {
             Log.e(TAG, "⚠️ Error emitting locationUpdate: " + e.getMessage());
         }
     }
-
 
 
     private void callAcceptORRejctApi(String status, String orderId) {
@@ -847,8 +1022,8 @@ public class Order extends Fragment {
                             }
                         }
 
-                        // 🔄 Refresh active order list
-                        loadActiveOrders();
+                  /*      // 🔄 Refresh active order list
+                        loadActiveOrders();*/
 
                     } else {
                         Toast.makeText(requireContext(), "❌ " + model.getMessage(), Toast.LENGTH_SHORT).show();
@@ -895,6 +1070,79 @@ public class Order extends Fragment {
         }
     }
 
+    private void emitReachedResponseSocket(String orderId) {
+        try {
+            if (socket == null || !socket.connected()) {
+                Log.e(TAG, "❌ Socket not connected, cannot emit order_response");
+                return;
+            }
+            if (partnerId == null || partnerId.isEmpty()) {
+                Log.e(TAG, "❌ Partner ID missing, cannot emit order_response");
+                return;
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("orderId", orderId);
+            jsonObject.put("partnerId", partnerId);
+
+            socket.emit("reached_restaurant", jsonObject);
+
+            Log.d(TAG, "📡 Emitted reached_restaurant → " + jsonObject.toString());
+
+        } catch (Exception e) {
+            Log.e(TAG, "⚠️ Error emitting reached_restaurant: " + e.getMessage());
+        }
+    }
+
+    private void emitPicketOrderResponseSocket(String orderId) {
+        try {
+            if (socket == null || !socket.connected()) {
+                Log.e(TAG, "❌ Socket not connected, cannot emit order_response");
+                return;
+            }
+            if (partnerId == null || partnerId.isEmpty()) {
+                Log.e(TAG, "❌ Partner ID missing, cannot emit order_response");
+                return;
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("orderId", orderId);
+            jsonObject.put("partnerId", partnerId);
+
+            socket.emit("picked_order", jsonObject);
+
+            Log.d(TAG, "📡 Emitted picked_order → " + jsonObject.toString());
+
+        } catch (Exception e) {
+            Log.e(TAG, "⚠️ Error emitting picked_order: " + e.getMessage());
+        }
+    }
+
+    private void emitDeliveredOrderResponseSocket(String orderId) {
+        try {
+            if (socket == null || !socket.connected()) {
+                Log.e(TAG, "❌ Socket not connected, cannot emit order_response");
+                return;
+            }
+            if (partnerId == null || partnerId.isEmpty()) {
+                Log.e(TAG, "❌ Partner ID missing, cannot emit order_response");
+                return;
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("orderId", orderId);
+            jsonObject.put("partnerId", partnerId);
+
+            socket.emit("delivered_order", jsonObject);
+
+            Log.d(TAG, "📡 Emitted delivered_order → " + jsonObject.toString());
+            Toast.makeText(requireContext(), "✅ Delivered Order", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Log.e(TAG, "⚠️ Error emitting delivered_order: " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void onDestroyView() {
@@ -902,6 +1150,7 @@ public class Order extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
     // ✅ Stop location updates when needed (e.g., on delivery complete or fragment closed)
     private void stopLocationUpdates() {
         if (fusedLocationClient != null && locationCallback != null) {

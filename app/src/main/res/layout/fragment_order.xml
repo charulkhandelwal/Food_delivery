@@ -61,6 +61,10 @@
                     android:layout_marginVertical="20dp"
                     android:orientation="vertical"
                     android:padding="8dp">
+                    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                        android:id="@+id/swipeRefreshLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerOrders"
@@ -70,6 +74,7 @@
                         android:paddingBottom="12dp"
                         tools:listitem="@layout/order_item"
                         android:visibility="visible" />
+                    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
                 </LinearLayout>
             </RelativeLayout>
 
@@ -237,16 +242,27 @@
                         android:textColor="#FFF" />
 
                     <Button
-                        android:id="@+id/btnDeliverToUser"
+                        android:id="@+id/btnPicked"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="4dp"
                         android:backgroundTint="#4CAF50"
-                        android:text="Deliver to User"
+                        android:text="Picked"
                         android:textAllCaps="false"
                         android:textColor="#FFF" />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnDeliveryComplete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#FF6B6B"
+                    android:text="Delivery Complete"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 

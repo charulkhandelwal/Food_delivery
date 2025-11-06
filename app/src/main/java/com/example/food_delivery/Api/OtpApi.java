@@ -1,6 +1,5 @@
 package com.example.food_delivery.Api;
 
-import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.Model.DocumentResponse;
@@ -19,7 +18,6 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -92,5 +90,12 @@ public interface OtpApi {
             @Header("Authorization") String bearerToken,
             @Body Map<String, String> body
     );
+
+    @POST(" delivery-partner/orders/order-delivered")
+    Call<ReachedRestaurantModel> deliveredOrder(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
 
 }
