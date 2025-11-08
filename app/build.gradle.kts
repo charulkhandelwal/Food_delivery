@@ -57,7 +57,11 @@ dependencies {
         implementation ("com.github.bumptech.glide:glide:5.0.5")
 
             implementation ("de.hdodenhof:circleimageview:3.1.0")
-        }
+
+
+        implementation ("com.facebook.shimmer:shimmer:0.5.0")
+
+    }
     }
 
 

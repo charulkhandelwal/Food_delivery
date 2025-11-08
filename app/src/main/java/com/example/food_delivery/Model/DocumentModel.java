@@ -5,7 +5,7 @@ public class DocumentModel {
     private String docName;
     private String imageUri;
     private boolean verified;
-    private String docType; // 🔥 Added field to identify document type (aadhar, pan, etc.)
+    private String docType;
 
     public DocumentModel(String docName, String imageUri) {
         this.docName = docName;
@@ -36,7 +36,7 @@ public class DocumentModel {
         this.verified = verified;
     }
 
-    // ✅ New field for document type
+
     public String getDocType() {
         return docType;
     }

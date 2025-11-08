@@ -8,7 +8,7 @@
             android:layout_height="match_parent"
             android:background="#FFFFFF">
 
-            <!-- 🔹 Order List Screen -->
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -73,7 +73,6 @@
                 </LinearLayout>
             </RelativeLayout>
 
-            <!-- 🔹 Map + Details Screen -->
             <LinearLayout
                 android:id="@+id/layoutMapTracking"
                 android:layout_width="match_parent"
@@ -82,7 +81,7 @@
                 android:visibility="gone"
                 android:background="#FFFFFF">
 
-                <!-- Back Button -->
+
                 <ImageButton
                     android:id="@+id/btnBack"
                     android:layout_width="48dp"
@@ -92,7 +91,7 @@
                     android:src="@drawable/ic_back"
                     android:backgroundTint="@color/black" />
 
-                <!-- Fixed Map Height -->
+
                 <FrameLayout
                     android:id="@+id/mapFragmentContainer"
                     android:layout_width="match_parent"
@@ -102,7 +101,7 @@
                     android:background="#EEE"
                     android:elevation="2dp" />
 
-                <!-- Address Info -->
+
                 <TextView
                     android:id="@+id/tvMapSelectedAddress"
                     android:layout_width="match_parent"
@@ -113,7 +112,6 @@
                     android:textColor="#000"
                     android:textStyle="bold" />
 
-                <!-- Scrollable Details -->
                 <ScrollView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -126,7 +124,7 @@
                         android:orientation="vertical"
                         android:dividerPadding="8dp">
 
-                        <!-- Restaurant Details -->
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -149,14 +147,14 @@
                             android:text="Address: -"
                             android:layout_marginTop="2dp" />
 
-                        <!-- Divider -->
+
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:background="#DDD"
                             android:layout_marginVertical="8dp" />
 
-                        <!-- Order Details -->
+
                         <TextView
                             android:text="Order Details"
                             android:layout_width="wrap_content"
@@ -179,14 +177,14 @@
                             android:text="Amount: -"
                             android:layout_marginTop="2dp" />
 
-                        <!-- Divider -->
+
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:background="#DDD"
                             android:layout_marginVertical="8dp" />
 
-                        <!-- Delivery Details -->
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -204,7 +202,7 @@
                     </LinearLayout>
                 </ScrollView>
 
-                <!-- Start Button -->
+
                 <Button
                     android:id="@+id/btnStart"
                     android:layout_width="match_parent"

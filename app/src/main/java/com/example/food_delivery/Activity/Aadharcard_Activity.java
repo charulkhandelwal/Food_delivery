@@ -68,7 +68,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
         binding.btnUploadFront.setOnClickListener(v -> selectImage("front"));
         binding.btnUploadBack.setOnClickListener(v -> selectImage("back"));
 
-        // Hide or disable back upload depending on document type
+
         if (docType.equalsIgnoreCase("pan")) {
             binding.btnUploadBack.setEnabled(false);
             binding.btnUploadBack.setAlpha(0.5f);
@@ -93,11 +93,11 @@ public class Aadharcard_Activity extends AppCompatActivity {
                 break;
         }
 
-        // ✅ Fetch uploaded doc if exists
+
         getUploadedDocuments();
     }
 
-    // ✅ Initialize Launchers
+
     private void initLaunchers() {
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
             if (result && tempCameraUri != null) {
@@ -112,7 +112,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
         });
     }
 
-    // ✅ Select source
+
     private void selectImage(String type) {
         currentDoc = type;
         String[] options = {"Camera", "Gallery"};
@@ -196,6 +196,7 @@ public class Aadharcard_Activity extends AppCompatActivity {
                     Toast.makeText(Aadharcard_Activity.this, "Uploaded successfully!", Toast.LENGTH_SHORT).show();
                     Log.d("UPLOAD_SUCCESS", "Document uploaded: " + docType);
                     getUploadedDocuments();
+                    finish();
                 } else {
                     Log.e("UPLOAD_FAIL", "Code: " + response.code());
                     Toast.makeText(Aadharcard_Activity.this, "Upload failed! Try again.", Toast.LENGTH_SHORT).show();

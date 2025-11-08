@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
     </data>
@@ -56,7 +57,7 @@
                 android:padding="12dp"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Last Name -->
+
             <TextView
                 android:id="@+id/tvLastName"
                 android:layout_width="wrap_content"
@@ -150,7 +151,7 @@
                 android:padding="12dp"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Secondary Mobile -->
+
             <TextView
                 android:id="@+id/tvSecondaryMobile"
                 android:layout_width="wrap_content"
@@ -310,6 +311,17 @@
                 android:textColor="@android:color/white"
                 android:background="@drawable/submit_button_bg"
                 android:layout_marginBottom="48dp" />
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
         </LinearLayout>
     </ScrollView>
 </layout>

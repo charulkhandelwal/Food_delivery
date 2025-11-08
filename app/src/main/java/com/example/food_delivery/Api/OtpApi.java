@@ -4,11 +4,14 @@ import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.Model.DocumentResponse;
+import com.example.food_delivery.Model.GetFaqResponse;
+import com.example.food_delivery.Model.HelpSupportResponse;
 import com.example.food_delivery.Model.OrderHistoryResponse;
 import com.example.food_delivery.Model.OrderModel;
 import com.example.food_delivery.Model.GetProfileResponse;
 import com.example.food_delivery.Model.OtpResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
+import com.example.food_delivery.Model.PrivacyPolicyModelResponse;
 import com.example.food_delivery.Model.ProfileModel;
 
 import java.util.List;
@@ -36,6 +39,12 @@ public interface OtpApi {
     @Headers("Content-Type: application/json")
     @POST("delivery-partner/verify-otp")
     Call<OtpVerifyResponse> verifyOtp(@Body Map<String, String> body);
+
+    @Headers("Content-Type: application/json")
+    @POST("deliveryman/support/delivery-support-create")
+    Call<HelpSupportResponse> supportDelivery(
+            @Header("Authorization") String token,
+            @Body Map<String, String> body);
 
     @Multipart
     @PUT("delivery-partner/profile")
@@ -80,6 +89,12 @@ public interface OtpApi {
 
     @GET("delivery-partner/orders/history")
     Call<OrderHistoryResponse> getHistory(@Header("Authorization") String bearerToekn);
+    @GET("delivery-partner/privacy-policy")
+    Call<PrivacyPolicyModelResponse> getPrivacy(@Header("Authorization") String bearerToken);
+    @GET("delivery-partner/terms-and-conditions")
+    Call<PrivacyPolicyModelResponse> getTerms(@Header("Authorization") String bearerToken);
+    @GET("delivery-partner/faq")
+    Call<GetFaqResponse> getFaq(@Header("Authorization") String bearerToken);
 
 
 }

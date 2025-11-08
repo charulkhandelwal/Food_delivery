@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -92,6 +93,10 @@ public class OtpActivity extends AppCompatActivity {
     }
 
     private void verifyOtpApi(String phone, String otp, String countryCode) {
+        // Show loader
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.btnverify.setEnabled(false);
+
         OtpApi api = ApiClient.getClient().create(OtpApi.class);
 
         Map<String, String> body = new HashMap<>();
@@ -105,6 +110,10 @@ public class OtpActivity extends AppCompatActivity {
         call.enqueue(new Callback<OtpVerifyResponse>() {
             @Override
             public void onResponse(Call<OtpVerifyResponse> call, Response<OtpVerifyResponse> response) {
+                // Hide loader
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnverify.setEnabled(true);
+
                 if (response.isSuccessful() && response.body() != null) {
                     OtpVerifyResponse otpResponse = response.body();
 
@@ -125,12 +134,10 @@ public class OtpActivity extends AppCompatActivity {
                         connectSocket(partnerId);
 
                         if (isNewUser) {
-                            // New user → go fill personal info first
                             Log.d("NAVIGATION", "🆕 New user → Personal Info screen");
                             startActivity(new Intent(OtpActivity.this, Personal_informationActivity.class));
                             finish();
                         } else {
-                            // Existing user → fetch documents
                             Log.d("NAVIGATION", "👤 Existing user → checking document statuses...");
                             getDocumentsFromServer(token);
                         }
@@ -147,6 +154,10 @@ public class OtpActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<OtpVerifyResponse> call, Throwable t) {
+                // Hide loader
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnverify.setEnabled(true);
+
                 Toast.makeText(OtpActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e("OTP_VERIFY_FAILURE", "Error: " + t.getMessage(), t);
             }
@@ -154,6 +165,7 @@ public class OtpActivity extends AppCompatActivity {
     }
 
     private void getDocumentsFromServer(String token) {
+        binding.progressBar.setVisibility(View.VISIBLE);
         OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
         Call<DocumentGetResponse> call = api.getdocuments();
 
@@ -162,6 +174,8 @@ public class OtpActivity extends AppCompatActivity {
         call.enqueue(new Callback<DocumentGetResponse>() {
             @Override
             public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
+                binding.progressBar.setVisibility(View.GONE);
+
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     DocumentGetResponse.Documents docs = response.body().getResults().documents;
 
@@ -207,6 +221,7 @@ public class OtpActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
+                binding.progressBar.setVisibility(View.GONE);
                 Log.e("DOC_API_ERROR", "⚠️ Failed to fetch documents: " + t.getMessage());
                 startActivity(new Intent(OtpActivity.this, Document_Activity.class));
                 finish();

@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        // Close the app instead of going back to login/signup
+
         super.onBackPressed();
         finishAffinity();
     }

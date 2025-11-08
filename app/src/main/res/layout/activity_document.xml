@@ -9,7 +9,51 @@
         android:layout_height="match_parent"
         android:background="#FFFFFF">
 
-        <!-- ✅ SwipeRefreshLayout wraps the ScrollView -->
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1200">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E0E0E0" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E0E0E0" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E0E0E0" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E0E0E0" />
+
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
@@ -28,7 +72,7 @@
                     android:orientation="vertical"
                     android:padding="12dp">
 
-                    <!-- Header -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="150dp"
@@ -56,7 +100,7 @@
                             android:layout_marginTop="6dp" />
                     </LinearLayout>
 
-                    <!-- Pending Documents Title -->
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -66,7 +110,7 @@
                         android:textColor="#000000"
                         android:layout_marginVertical="12dp" />
 
-                    <!-- Pending: Personal -->
+
                     <androidx.cardview.widget.CardView
                         android:id="@+id/pendingPersonal5"
                         android:layout_width="match_parent"
@@ -253,7 +297,7 @@
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Pending: Bank -->
+
                     <androidx.cardview.widget.CardView
                         android:id="@+id/pendingBank"
                         android:layout_width="match_parent"
@@ -300,7 +344,7 @@
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Completed Documents Title -->
+
                   <!--  <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -310,7 +354,7 @@
                         android:textColor="#000000"
                         android:layout_marginVertical="12dp" />
 -->
-                    <!-- Completed Cards -->
+
                     <androidx.cardview.widget.CardView
                         android:id="@+id/completedPersonal"
                         android:layout_width="match_parent"
@@ -399,7 +443,7 @@
             </ScrollView>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <!-- Bottom Button -->
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
@@ -413,7 +457,7 @@
             android:padding="12dp"
             android:background="@drawable/submit_button_bg" />
 
-        <!-- ✅ Center Loader -->
+
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="60dp"

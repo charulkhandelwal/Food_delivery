@@ -4,184 +4,245 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
     </data>
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
         android:background="#FFFFFF">
 
-        <LinearLayout
+        <!-- 🌟 Shimmer Layout (Initially Visible) -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
-
+            android:layout_height="match_parent"
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1000"
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp">
+                android:padding="20dp">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/imgProfile"
+                <!-- Fake shimmer placeholders -->
+                <View
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:src="@drawable/log"
-                    android:background="@drawable/bg_profile_circle"
-                    android:scaleType="centerCrop"
-                    android:padding="5dp"
-                    app:shapeAppearanceOverlay="@style/CircleImage"/>
+                    android:layout_gravity="center"
+                    android:background="@drawable/shimmer_placeholder_circle"
+                    android:layout_marginTop="16dp" />
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/shimmer_placeholder_rect" />
+
+                <!-- Repeat shimmer placeholders -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/shimmer_placeholder_rect" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/shimmer_placeholder_rect" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/shimmer_placeholder_rect" />
+
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- 🌟 Actual ScrollView Content (Visible After Data Loads) -->
+        <ScrollView
+            android:id="@+id/contentScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:background="#FFFFFF"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgProfile"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/log"
+                        android:background="@drawable/bg_profile_circle"
+                        android:scaleType="centerCrop"
+                        android:padding="5dp"
+                        app:shapeAppearanceOverlay="@style/CircleImage"/>
+
+                    <TextView
+                        android:id="@+id/tvChangePhoto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Change Photo"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tvChangePhoto"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Change Photo"
-                    android:textColor="@color/red"
-                    android:textStyle="bold"
+                    android:text="Full Name"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
                     android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Enter your name"
+                    android:paddingStart="12dp"
+                    android:padding="12dp"
+                    android:textSize="16sp"
+                    android:inputType="textPersonName" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mobile Number"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="12dp" />
+
+                <EditText
+                    android:id="@+id/etMobile"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Enter your mobile number"
+                    android:paddingStart="12dp"
+                    android:padding="12dp"
+                    android:inputType="phone"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tvDob"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date of Birth"
+                    android:textColor="@color/dark_grey"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/etDob"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="dd-mm-yyyy"
+                    android:focusable="false"
+                    android:drawableEnd="@drawable/ic_calender"
+                    android:background="@drawable/edittext_bg"
+                    android:padding="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BloodGroup"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="12dp" />
+
+                <EditText
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/etBloodGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Enter your BloodGroup"
+                    android:padding="12dp"
+                    android:paddingStart="12dp"
+                    android:inputType="text"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="City"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="12dp" />
+
+                <EditText
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/etCity"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Enter your city name"
+                    android:padding="12dp"
+                    android:paddingStart="12dp"
+                    android:inputType="text"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Address"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="12dp" />
+
+                <EditText
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/etAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_edittext"
+                    android:hint="Enter your Address"
+                    android:padding="12dp"
+                    android:paddingStart="12dp"
+                    android:inputType="textPostalAddress"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:text="Save Changes"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/red"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp" />
             </LinearLayout>
+        </ScrollView>
 
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Full Name"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="8dp" />
-
-            <TextView
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_edittext"
-                android:hint="Enter your name"
-                android:paddingStart="12dp"
-                android:padding="12dp"
-                android:textSize="16sp"
-                android:inputType="textPersonName" />
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mobile Number"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="12dp" />
-
-            <TextView
-                android:id="@+id/etMobile"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_edittext"
-                android:hint="Enter your mobile number"
-                android:paddingStart="12dp"
-                android:padding="12dp"
-                android:inputType="phone"
-                android:textSize="16sp" />
-
-
-            <TextView
-                android:id="@+id/tvDob"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Date of Birth"
-                android:textColor="@color/dark_grey"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/etDob"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="dd-mm-yyyy"
-                android:focusable="false"
-                android:drawableEnd="@drawable/ic_calender"
-                android:background="@drawable/edittext_bg"
-                android:padding="12dp"
-                android:layout_marginBottom="12dp" />
-
-
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BloodGroup"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="12dp" />
-
-            <TextView
-                android:layout_marginTop="5dp"
-                android:id="@+id/etBloodGroup"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_edittext"
-                android:hint="Enter your BloodGroup"
-                android:padding="12dp"
-                android:paddingStart="12dp"
-                android:inputType="textEmailAddress"
-                android:textSize="16sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="City"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="12dp" />
-
-            <TextView
-                android:layout_marginTop="5dp"
-                android:id="@+id/etCity"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_edittext"
-                android:hint="Enter your city name"
-                android:padding="12dp"
-                android:paddingStart="12dp"
-                android:inputType="textEmailAddress"
-                android:textSize="16sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Address"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="12dp" />
-
-            <TextView
-                android:layout_marginTop="5dp"
-                android:id="@+id/etAddress"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_edittext"
-                android:hint="Enter your Address"
-                android:padding="12dp"
-                android:paddingStart="12dp"
-                android:inputType="textEmailAddress"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:text="Save Changes"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/red"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="24dp" />
-
-        </LinearLayout>
-
-    </ScrollView>
+    </FrameLayout>
 </layout>

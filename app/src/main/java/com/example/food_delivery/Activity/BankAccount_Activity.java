@@ -116,7 +116,7 @@ public class BankAccount_Activity extends AppCompatActivity {
         map.put("accountNumber", createPartFromString(accountNumber));
         map.put("ifscCode", createPartFromString(ifscCode));
 
-        // Dummy empty part list because API expects form-data
+
         MultipartBody.Part dummyFile = MultipartBody.Part.createFormData("bankDetailsFront", "", RequestBody.create(MediaType.parse("image/*"), new byte[0]));
 
         OtpApi api = ApiClient.getClientWithToken(token).create(OtpApi.class);
@@ -127,7 +127,8 @@ public class BankAccount_Activity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(BankAccount_Activity.this, "Bank details uploaded successfully!", Toast.LENGTH_SHORT).show();
                     Log.d("BANK_UPLOAD", "✅ Success");
-                    getBankDetails(); // Refresh data
+                    getBankDetails();
+                    finish();
                 } else {
                     Toast.makeText(BankAccount_Activity.this, "Upload failed! Try again.", Toast.LENGTH_SHORT).show();
                     Log.e("BANK_UPLOAD", "❌ Failed - Code: " + response.code());
