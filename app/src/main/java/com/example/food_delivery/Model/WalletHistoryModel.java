@@ -10,11 +10,12 @@ public class WalletHistoryModel {
     private String paymentMode;
     private String transactionId;
     private String amount;
+    private  String OrderId;
 
 
     public WalletHistoryModel(String userName, String userAddress,String userRestaurent, String items,
                               String orderTime, String paymentMode,
-                              String transactionId, String amount) {
+                              String transactionId, String OrderId,String amount) {
         this.userName = userName;
         this.userAddress = userAddress;
         this.userRestaurent=userRestaurent;
@@ -23,6 +24,7 @@ public class WalletHistoryModel {
         this.paymentMode = paymentMode;
         this.transactionId = transactionId;
         this.amount = amount;
+        this.OrderId = OrderId;
     }
 
     public String getUserName() { return userName; }
@@ -32,5 +34,6 @@ public class WalletHistoryModel {
     public String getOrderTime() { return orderTime; }
     public String getPaymentMode() { return paymentMode; }
     public String getTransactionId() { return transactionId; }
-    public String getAmount() { return amount; }
+    public String getAmount() { return amount;}
+    public String getOrderId(){return OrderId;}
 }

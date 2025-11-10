@@ -13,6 +13,7 @@ import com.example.food_delivery.Model.OtpResponse;
 import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.Model.PrivacyPolicyModelResponse;
 import com.example.food_delivery.Model.ProfileModel;
+import com.example.food_delivery.Model.WalletHistoryModelResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,8 @@ public interface OtpApi {
     Call<PrivacyPolicyModelResponse> getTerms(@Header("Authorization") String bearerToken);
     @GET("delivery-partner/faq")
     Call<GetFaqResponse> getFaq(@Header("Authorization") String bearerToken);
+    @GET("delivery-partner/wallet-history")
+    Call<WalletHistoryModelResponse> getWalletHistory(@Header("Authorization") String bearerToken);
 
 
 }
