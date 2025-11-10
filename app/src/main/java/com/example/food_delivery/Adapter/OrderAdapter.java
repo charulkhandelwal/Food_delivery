@@ -115,6 +115,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
             // ✅ Price (convert int to string)
             b.tvTotalPrice.setText(String.valueOf("₹"+ order.getFinalPrice()));
+            b.tvPaymentStatus.setText(order.getPaymentMethod());
 
             if (order.getRestaurantData() != null &&
                     !TextUtils.isEmpty(order.getRestaurantData().getAddress())) {
@@ -124,8 +125,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
 
 
-            if (order.getUserData() != null && order.getUserData().getAddresses() != null && !order.getUserData().getAddresses().isEmpty()) {
-                b.tvPickupLocation.setText(order.getUserData().getAddresses().get(0).getCompleteAddress());
+            if (order.getAddressData() != null) {
+                b.tvPickupLocation.setText(order.getAddressData().getCompleteAddress());
             } else {
                 b.tvPickupLocation.setText("No address available");
             }
@@ -140,8 +141,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             b.layoutdetails.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.tvPickupLocation.setVisibility(expanded ? View.VISIBLE : View.GONE);
             b.paymentView.setVisibility(expanded ? View.VISIBLE : View.GONE);
-            b.deliveryInfo.setVisibility(expanded ? View.VISIBLE : View.GONE);
-            b.tvSelectOption.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            /*b.deliveryInfo.setVisibility(expanded ? View.VISIBLE : View.GONE);
+            b.tvSelectOption.setVisibility(expanded ? View.VISIBLE : View.GONE);*/
             b.pickupView.setVisibility(expanded ? View.VISIBLE : View.GONE);
 
             // Rotate arrow with animation for better UX
@@ -174,7 +175,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 listener.onCancelPickup(order);
             });
             // ✅ Show "Select an Option" dialog
-            b.tvSelectOption.setOnClickListener(v -> {
+       /*     b.tvSelectOption.setOnClickListener(v -> {
                 String[] options = {"Pickup", "Delivered"};
                 new android.app.AlertDialog.Builder(context)
                         .setTitle("Choose an option")
@@ -183,7 +184,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                             b.tvSelectOption.setText(selected);
                         })
                         .show();
-            });
+            });*/
 
         }
     }

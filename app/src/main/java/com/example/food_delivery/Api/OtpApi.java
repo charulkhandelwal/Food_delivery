@@ -65,7 +65,8 @@ public interface OtpApi {
     );
 
     @GET("delivery-partner/orders/active")
-    Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
+    Call<OrderModel> getActivOrders(@Header("Authorization") String bearerToken);
+
     @GET("delivery-partner/profile")
     Call<GetProfileResponse> getProfile();
 
@@ -91,11 +92,28 @@ public interface OtpApi {
             @Body Map<String, String> body
     );
 
-    @POST(" delivery-partner/orders/order-delivered")
+    @POST("delivery-partner/orders/order-delivered")
     Call<ReachedRestaurantModel> deliveredOrder(
             @Header("Authorization") String bearerToken,
             @Body Map<String, String> body
     );
 
+    @POST("delivery-partner/orders/receive-payment")
+    Call<ReachedRestaurantModel> receivePayment(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/order-completed")
+    Call<ReachedRestaurantModel> completeOrder(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/payment-received-by-admin")
+    Call<ReachedRestaurantModel> paymentReceivedByAdmin(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
 
 }

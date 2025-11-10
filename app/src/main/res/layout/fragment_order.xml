@@ -254,11 +254,44 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/btnDeliveryComplete"
+                    android:id="@+id/btnOrder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"
                     android:backgroundTint="#FF6B6B"
+                    android:text="Order Delivered"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnPaymentReceive"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="Payment complete"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnSendAmountToAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#FF6B6B"
+                    android:text="Pay to Admin"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnOrderCompleted"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#4CAF50"
                     android:text="Delivery Complete"
                     android:textAllCaps="false"
                     android:textColor="#FFF"
