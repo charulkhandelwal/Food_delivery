@@ -61,6 +61,10 @@
                     android:layout_marginVertical="20dp"
                     android:orientation="vertical"
                     android:padding="8dp">
+                    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                        android:id="@+id/swipeRefreshLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerOrders"
@@ -70,6 +74,7 @@
                         android:paddingBottom="12dp"
                         tools:listitem="@layout/order_item"
                         android:visibility="visible" />
+                    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
                 </LinearLayout>
             </RelativeLayout>
 
@@ -212,6 +217,83 @@
                     android:text="Start Delivery"
                     android:textAllCaps="false"
                     android:textColor="#FFF" />
+
+                <!-- Reached + Deliver Buttons -->
+                <LinearLayout
+                    android:id="@+id/llView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btnReached"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:backgroundTint="#FFA500"
+                        android:text="Reached"
+                        android:textAllCaps="false"
+                        android:textColor="#FFF" />
+
+                    <Button
+                        android:id="@+id/btnPicked"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="#4CAF50"
+                        android:text="Picked"
+                        android:textAllCaps="false"
+                        android:textColor="#FFF" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnOrder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#FF6B6B"
+                    android:text="Order Delivered"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnPaymentReceive"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="Payment complete"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnSendAmountToAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#FF6B6B"
+                    android:text="Pay to Admin"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/btnOrderCompleted"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="Delivery Complete"
+                    android:textAllCaps="false"
+                    android:textColor="#FFF"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 

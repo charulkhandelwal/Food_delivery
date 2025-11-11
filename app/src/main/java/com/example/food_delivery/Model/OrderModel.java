@@ -36,9 +36,12 @@ public class OrderModel {
         private String createdAt;
         private String updatedAt;
         private int __v;
+        private boolean driverReachedRestaurant;
         private RestaurantDataBean restaurantData;
         private List<DishesBean> dishes;
         private UserData userData;
+        private DeliveryAddress deliveryAddress;
+        private AddressData addressData;
 
         // ✅ Local fields
         private transient boolean isNew = true;
@@ -110,11 +113,21 @@ public class OrderModel {
         public int get__v() { return __v; }
         public void set__v(int __v) { this.__v = __v; }
 
+        public boolean getdriverReachedRestaurant() { return driverReachedRestaurant; }
+        public void setdriverReachedRestaurant(boolean driverReachedRestaurant) { this.driverReachedRestaurant = driverReachedRestaurant; }
+
         public RestaurantDataBean getRestaurantData() { return restaurantData; }
         public void setRestaurantData(RestaurantDataBean restaurantData) { this.restaurantData = restaurantData; }
 
         public UserData getUserData() { return userData; }
         public void setUserData(UserData userData) { this.userData = userData; }
+
+        public DeliveryAddress getDeliveryAddressData() { return deliveryAddress; }
+        public void setDeliveryAddressData(DeliveryAddress deliveryAddress) { this.deliveryAddress = deliveryAddress; }
+
+        public AddressData getAddressData() { return addressData; }
+        public void setAddressData(AddressData addressData) { this.addressData = addressData; }
+
 
         public List<DishesBean> getDishes() { return dishes; }
         public void setDishes(List<DishesBean> dishes) { this.dishes = dishes; }
@@ -392,6 +405,70 @@ public class OrderModel {
             public List<Double> getCoordinates() { return coordinates; }
             public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
         }
+
+        public static class AddressData implements Serializable {
+            private String _id;
+            private String userId;
+            private String country;
+            private String addressType;
+            private String zipCode;
+            private Location location;
+            private String completeAddress;
+            private boolean defaultAddress;
+            private String area;
+            private String createdAt;
+            private String updatedAt;
+            private int __v;
+
+            // ✅ Getters and Setters
+            public String get_id() { return _id; }
+            public void set_id(String _id) { this._id = _id; }
+
+            public String getUserId() { return userId; }
+            public void setUserId(String userId) { this.userId = userId; }
+
+            public String getCountry() { return country; }
+            public void setCountry(String country) { this.country = country; }
+
+            public String getAddressType() { return addressType; }
+            public void setAddressType(String addressType) { this.addressType = addressType; }
+
+            public String getZipCode() { return zipCode; }
+            public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+
+            public Location getLocation() { return location; }
+            public void setLocation(Location location) { this.location = location; }
+
+            public String getCompleteAddress() { return completeAddress; }
+            public void setCompleteAddress(String completeAddress) { this.completeAddress = completeAddress; }
+
+            public boolean isDefaultAddress() { return defaultAddress; }
+            public void setDefaultAddress(boolean defaultAddress) { this.defaultAddress = defaultAddress; }
+
+            public String getArea() { return area; }
+            public void setArea(String area) { this.area = area; }
+
+            public String getCreatedAt() { return createdAt; }
+            public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+            public String getUpdatedAt() { return updatedAt; }
+            public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+            public int get__v() { return __v; }
+            public void set__v(int __v) { this.__v = __v; }
+        }
+
+        public static class DeliveryAddress {
+            private String type;
+            private List<Double> coordinates;
+
+            public String getType() { return type; }
+            public void setType(String type) { this.type = type; }
+
+            public List<Double> getCoordinates() { return coordinates; }
+            public void setCoordinates(List<Double> coordinates) { this.coordinates = coordinates; }
+        }
+
 
     }
 }

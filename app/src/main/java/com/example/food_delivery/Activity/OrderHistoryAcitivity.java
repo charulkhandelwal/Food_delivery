@@ -2,6 +2,7 @@ package com.example.food_delivery.Activity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,10 +62,36 @@ public class OrderHistoryAcitivity extends AppCompatActivity {
             public void onResponse(Call<OrderHistoryResponse> call, Response<OrderHistoryResponse> response) {
                 Log.d("order history", "Response: " + new Gson().toJson(response.body()));
                 if (response.isSuccessful() && response.body() != null) {
-                    System.out.println("✅ API Success Body: " + response.body());
-                    orderList.clear();
-                    orderList.addAll(response.body().getResults().getData());
-                    setupAdapter();
+                    OrderHistoryResponse result = response.body();
+
+                    // ✅ SAFETY CHECK
+                    if (result.getResults() != null && result.getResults().getData() != null) {
+                        orderList.clear();
+                        orderList.addAll(result.getResults().getData());
+                        setupAdapter();
+
+                        if (orderList.isEmpty()) {
+                            binding.layoutNoOrders.setVisibility(View.VISIBLE);
+                            binding.rvOrderHistory.setVisibility(View.GONE);
+                        } else {
+                            binding.layoutNoOrders.setVisibility(View.GONE);
+                            binding.rvOrderHistory.setVisibility(View.VISIBLE);
+                        }
+
+                    } else {
+                        Log.e("order history", "API failed with code: " + response.code());
+                        binding.layoutNoOrders.setVisibility(View.VISIBLE);
+                        binding.rvOrderHistory.setVisibility(View.GONE);
+
+                        if (response.errorBody() != null) {
+                            try {
+                                Log.e("order history", "Error: " + response.errorBody().string());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
                 }
                 else {
                     System.out.println("⚠️ API Failed - Code: " + response.code());

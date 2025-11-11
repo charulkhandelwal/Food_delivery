@@ -3,6 +3,7 @@ package com.example.food_delivery.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -15,6 +16,8 @@ import com.example.food_delivery.fragment.Order;
 public class MainActivity extends AppCompatActivity {
 
     Button btnOrders, btnAccount;
+    private boolean isOrderInProgress = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,20 +31,22 @@ public class MainActivity extends AppCompatActivity {
         loadFragment(new Order());
         highlightSelected(btnOrders, btnAccount);
 
-        btnOrders.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new Order());
-                highlightSelected(btnOrders, btnAccount);
+        btnOrders.setOnClickListener(v -> {
+            if (isOrderInProgress) {
+                showRestrictionToast();
+                return;
             }
+            loadFragment(new Order());
+            highlightSelected(btnOrders, btnAccount);
         });
 
-        btnAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadFragment(new Account());
-                highlightSelected(btnAccount, btnOrders);
+        btnAccount.setOnClickListener(v -> {
+            if (isOrderInProgress) {
+                showRestrictionToast();
+                return;
             }
+            loadFragment(new Account());
+            highlightSelected(btnAccount, btnOrders);
         });
     }
 
@@ -59,11 +64,22 @@ public class MainActivity extends AppCompatActivity {
         unselected.setBackgroundResource(R.drawable.bottom_unselected);
         unselected.setTextColor(getResources().getColor(android.R.color.black));
     }
+
     @Override
     public void onBackPressed() {
+        if (isOrderInProgress) {
+            Toast.makeText(this, "🚫 Please complete the current order before exiting.", Toast.LENGTH_SHORT).show();
+        } else {
+            super.onBackPressed();
+            finishAffinity();
+        }
+    }
+    private void showRestrictionToast() {
+        Toast.makeText(this, "🚫 You cannot leave until the current order is completed.", Toast.LENGTH_SHORT).show();
+    }
 
-        super.onBackPressed();
-        finishAffinity();
+    public void setOrderInProgress(boolean inProgress) {
+        isOrderInProgress = inProgress;
     }
 
 }

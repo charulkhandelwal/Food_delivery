@@ -50,8 +50,14 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
         b.tvRestaurantAddress.setText(order.getRestaurantId().getAddress());
         b.tvOrderId.setText("Order ID: " + order.getOrderId());
         b.tvCustomerName.setText("Customer: " + order.getUserId().getFirstName() + " (" + order.getUserId().getMobile() + ")");
-        b.tvAddress.setText("Delivered to: " + order.getAddressId().getCompleteAddress() + ", " + order.getAddressId().getArea());
-        b.tvPrice.setText("₹" + order.getFinalPrice());
+        b.tvAddress.setText("Delivered to: " +
+                (order.getAddressId() != null && order.getAddressId().getCompleteAddress() != null
+                        ? order.getAddressId().getCompleteAddress()
+                        : "No address available") +
+                (order.getAddressId() != null && order.getAddressId().getArea() != null
+                        ? ", " + order.getAddressId().getArea()
+                        : "")
+        );        b.tvPrice.setText("₹" + order.getFinalPrice());
 
 
         String status= order.getStatus();

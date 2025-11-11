@@ -1,6 +1,5 @@
 package com.example.food_delivery.Api;
 
-import com.example.food_delivery.Activity.Sign_up;
 import com.example.food_delivery.Model.AcceptRejectOrderModel;
 import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.Model.DocumentResponse;
@@ -14,6 +13,7 @@ import com.example.food_delivery.Model.OtpVerifyResponse;
 import com.example.food_delivery.Model.PrivacyPolicyModelResponse;
 import com.example.food_delivery.Model.ProfileModel;
 import com.example.food_delivery.Model.WalletHistoryModelResponse;
+import com.example.food_delivery.Model.ReachedRestaurantModel;
 
 import java.util.List;
 import java.util.Map;
@@ -74,11 +74,9 @@ public interface OtpApi {
             @Part List<MultipartBody.Part> files
     );
 
-
-
-
     @GET("delivery-partner/orders/active")
-    Call<OrderModel>getActivOrders(@Header("Authorization") String bearerToken);
+    Call<OrderModel> getActivOrders(@Header("Authorization") String bearerToken);
+
     @GET("delivery-partner/profile")
     Call<GetProfileResponse> getProfile();
 
@@ -99,5 +97,41 @@ public interface OtpApi {
     @GET("delivery-partner/wallet-history")
     Call<WalletHistoryModelResponse> getWalletHistory(@Header("Authorization") String bearerToken);
 
+
+    @POST("delivery-partner/orders/reached-restaurant")
+    Call<ReachedRestaurantModel> reachedRestaurant(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/picked-order")
+    Call<ReachedRestaurantModel> pickedOrderFromRestaurant(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/order-delivered")
+    Call<ReachedRestaurantModel> deliveredOrder(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/receive-payment")
+    Call<ReachedRestaurantModel> receivePayment(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/order-completed")
+    Call<ReachedRestaurantModel> completeOrder(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
+
+    @POST("delivery-partner/orders/payment-received-by-admin")
+    Call<ReachedRestaurantModel> paymentReceivedByAdmin(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, String> body
+    );
 
 }
