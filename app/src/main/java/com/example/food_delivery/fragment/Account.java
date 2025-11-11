@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.food_delivery.Activity.AboutActivity;
+import com.example.food_delivery.Activity.CodSettelment_Activity;
 import com.example.food_delivery.Activity.EditProfileActivity;
 import com.example.food_delivery.Activity.FAQ_Activity;
 import com.example.food_delivery.Activity.HelpSupportActivity;
@@ -77,8 +78,11 @@ public class Account extends Fragment {
         binding.editprofile.setOnClickListener(v ->
                 startActivity(new Intent(getActivity(), EditProfileActivity.class)));
 
-        binding.tvOrderHistory.setOnClickListener(v ->
+        binding.backorderhistory.setOnClickListener(v ->
                 startActivity(new Intent(getActivity(), OrderHistoryAcitivity.class)));
+
+        binding.backcodsettelment.setOnClickListener(v ->
+                startActivity(new Intent(getActivity(), CodSettelment_Activity.class)));
 
         binding.rowLogout.setOnClickListener(v -> showLogoutDialog());
     }

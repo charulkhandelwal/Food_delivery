@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
     </data>
 
     <LinearLayout
@@ -55,37 +54,10 @@
                     android:textSize="14sp"
                     android:textColor="@color/black" />
 
-               <!-- <TextView
-                    android:id="@+id/txtEmail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="loremipsum@gmail.com"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />-->
+
             </LinearLayout>
 
-           <!-- <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/txtRating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4.9"
-                    android:textSize="16sp"
-                    android:textColor="@color/black" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/star"
-                    android:tint="@color/lightpink"
-                    android:layout_marginStart="4dp"
-                    tools:ignore="UseAppTint" />
-            </LinearLayout>-->
         </LinearLayout>
 
 
@@ -104,7 +76,7 @@
             android:textColor="@color/black"
             android:textSize="16sp" />
 
-        <!-- Scrollable Options -->
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -179,6 +151,41 @@
                         android:textColor="@color/black" />
 
                     <ImageView
+                        android:id="@+id/backorderhistory"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/arrow"
+                        android:tint="@color/lightpink"
+                        tools:ignore="UseAppTint" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/codsettlement"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/option_item_bg">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/wallet_history"
+                        android:tint="@color/lightpink"
+                        tools:ignore="UseAppTint" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="COD Settlement"
+                        android:textSize="15sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:id="@+id/backcodsettelment"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/arrow"

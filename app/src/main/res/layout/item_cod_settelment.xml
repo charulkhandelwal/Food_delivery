@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Restaurant Name -->
+        <TextView
+            android:id="@+id/tvRestaurantName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restaurant Name"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+        <!-- Order ID -->
+        <TextView
+            android:id="@+id/tvOrderId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Order ID: #123456"
+            android:textColor="@color/lightpink"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Dishes List (Dynamic) -->
+        <LinearLayout
+            android:id="@+id/itemContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Payment Method -->
+        <TextView
+            android:id="@+id/tvPaymentMethod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Payment Method: COD"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

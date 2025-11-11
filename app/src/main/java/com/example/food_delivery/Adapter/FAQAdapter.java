@@ -48,11 +48,11 @@ public class FAQAdapter extends RecyclerView.Adapter<FAQAdapter.FAQViewHolder> {
         // Fade animation when showing the answer
         if (isExpanded) {
             AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
-            fadeIn.setDuration(300);
+            fadeIn.setDuration(200);
             holder.tvAnswer.startAnimation(fadeIn);
 
             ValueAnimator anim = ValueAnimator.ofInt(0, holder.tvAnswer.getMeasuredHeight());
-            anim.setDuration(300);
+            anim.setDuration(200);
             anim.start();
         }
     }
