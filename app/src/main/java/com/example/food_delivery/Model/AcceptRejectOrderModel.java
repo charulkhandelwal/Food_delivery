@@ -12,7 +12,7 @@ public class AcceptRejectOrderModel {
     @SerializedName("results")
     private Results results;
 
-    // ✅ Getters and Setters
+
     public boolean isSuccess() {
         return success;
     }
@@ -37,7 +37,7 @@ public class AcceptRejectOrderModel {
         this.results = results;
     }
 
-    // ✅ Inner class for "results"
+
     public static class Results {
 
         @SerializedName("activeOrderId")

@@ -42,12 +42,12 @@ public class OrderHistoryAcitivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
-        // Attach empty adapter first
+
         adapter = new OrderHistoryAdapter(orderList);
         binding.rvOrderHistory.setLayoutManager(new LinearLayoutManager(this));
         binding.rvOrderHistory.setAdapter(adapter);
 
-        // Then load data
+
         getApiCall();
 
     }

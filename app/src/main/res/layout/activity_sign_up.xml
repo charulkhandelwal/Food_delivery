@@ -85,7 +85,7 @@
                 </LinearLayout>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Terms checkbox -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

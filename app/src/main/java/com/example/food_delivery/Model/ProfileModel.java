@@ -6,7 +6,7 @@ import java.util.Date;
 public class ProfileModel {
     public boolean success;
     public String message;
-    public Results results;   // ✅ backend me "results" aata hai, "data" nahi
+    public Results results;
 
     public static class Results {
         public Location location;

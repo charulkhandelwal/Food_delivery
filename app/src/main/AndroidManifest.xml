@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- ✅ Required Permissions -->
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -29,9 +29,26 @@
         android:theme="@style/Theme.Food_delivery"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
+        <activity
+            android:name=".Activity.WalletHistory"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.FAQ_Activity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.PrivacyPolicyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.HelpSupportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.AboutActivity"
+            android:exported="false" />
         <activity
             android:name=".Activity.AskForLeave"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.OrderHistoryAcitivity"
             android:exported="false" />
         <activity
             android:name=".Activity.EditProfileActivity"
@@ -53,7 +70,6 @@
         <activity
             android:name=".Activity.BankAccount_Activity"
             android:exported="false" />
-
         <activity
             android:name=".Activity.Personal_informationActivity"
             android:exported="false" />
@@ -63,11 +79,6 @@
         <activity
             android:name=".Activity.Sign_up"
             android:exported="false" />
-
-        <activity
-            android:name=".Activity.OrderHistoryAcitivity"
-            android:exported="false" />
-
         <activity
             android:name=".Activity.Document_Activity"
             android:exported="false" />

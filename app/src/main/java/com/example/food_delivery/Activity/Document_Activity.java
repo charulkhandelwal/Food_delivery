@@ -7,12 +7,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.food_delivery.Api.ApiClient;
 import com.example.food_delivery.Api.OtpApi;
 import com.example.food_delivery.Model.DocumentGetResponse;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.ActivityDocumentBinding;
+import com.facebook.shimmer.ShimmerFrameLayout;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -21,6 +23,7 @@ import retrofit2.Response;
 public class Document_Activity extends AppCompatActivity {
 
     private ActivityDocumentBinding binding;
+    private ShimmerFrameLayout shimmerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +31,20 @@ public class Document_Activity extends AppCompatActivity {
         binding = ActivityDocumentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        shimmerLayout = binding.shimmerLayout;
+
+
+        startShimmer();
+
+
         getDocumentsFromServer();
+
+
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            startShimmer();
+            getDocumentsFromServer();
+        });
+
 
         binding.pendingPersonal5.setOnClickListener(v -> openUploadScreen("aadhar"));
         binding.pendingPersonal2.setOnClickListener(v -> openUploadScreen("pan"));
@@ -52,6 +68,19 @@ public class Document_Activity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
+    private void startShimmer() {
+        shimmerLayout.setVisibility(View.VISIBLE);
+        shimmerLayout.startShimmer();
+        binding.scrollView.setVisibility(View.GONE);
+    }
+
+    private void stopShimmer() {
+        shimmerLayout.stopShimmer();
+        shimmerLayout.setVisibility(View.GONE);
+        binding.scrollView.setVisibility(View.VISIBLE);
+        binding.swipeRefreshLayout.setRefreshing(false);
+    }
 
     private void checkAllApprovedAndProceed() {
         binding.progressBar.setVisibility(View.VISIBLE);
@@ -115,6 +144,7 @@ public class Document_Activity extends AppCompatActivity {
 
         if (token.isEmpty()) {
             Toast.makeText(this, "Missing token! Please log in again.", Toast.LENGTH_SHORT).show();
+            stopShimmer();
             binding.progressBar.setVisibility(View.GONE);
             return;
         }
@@ -128,6 +158,7 @@ public class Document_Activity extends AppCompatActivity {
             @Override
             public void onResponse(Call<DocumentGetResponse> call, Response<DocumentGetResponse> response) {
                 binding.progressBar.setVisibility(View.GONE);
+                stopShimmer();
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     updateUI(response.body().getResults().documents);
@@ -141,6 +172,7 @@ public class Document_Activity extends AppCompatActivity {
             @Override
             public void onFailure(Call<DocumentGetResponse> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
+                stopShimmer();
                 Log.e("DOC_API", "API failed: " + t.getMessage());
                 Toast.makeText(Document_Activity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -180,6 +212,7 @@ public class Document_Activity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        startShimmer();
         getDocumentsFromServer();
     }
 }

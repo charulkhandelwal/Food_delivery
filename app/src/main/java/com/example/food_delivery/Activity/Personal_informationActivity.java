@@ -211,6 +211,10 @@ public class Personal_informationActivity extends AppCompatActivity {
         if (fatherNameStr.isEmpty()) { binding.etFatherName.setError("Father name required"); return; }
         if (dobStr.isEmpty()) { binding.etDob.setError("DOB required"); return; }
         if (primaryMobileStr.isEmpty()) { binding.etPrimaryMobile.setError("Primary mobile required"); return; }
+        else if (!primaryMobileStr.matches("^[6-9]\\d{9}$")) {
+            binding.etPrimaryMobile.setError("Enter valid 10-digit mobile number");
+            return;
+        }
 
         if (bloodGroupStr.isEmpty()) {
             binding.etBloodGroup.setError("Blood group required");
@@ -223,6 +227,25 @@ public class Personal_informationActivity extends AppCompatActivity {
         if (cityStr.isEmpty()) { Toast.makeText(this, "Please select a city", Toast.LENGTH_SHORT).show(); return; }
         if (addressStr.isEmpty()) { binding.etAddress.setError("Address required"); return; }
         if (selectedProfileImage == null) { Toast.makeText(this, "Profile image required", Toast.LENGTH_SHORT).show(); return; }
+
+
+
+
+        if (languagesStr.isEmpty()) {
+            binding.etLanguages.setError("Languages required (Hindi/English)");
+            return;
+        } else{
+            String[] enteredLangs = languagesStr.replaceAll("\\s+", "").split(",");
+            for (String lang : enteredLangs) {
+                if (!lang.equals("hindi") && !lang.equals("english")) {
+                    binding.etLanguages.setError("Only Hindi and English are allowed");
+                    return;
+                }
+            }
+        }
+
+
+        languagesStr = "hindi,english";
 
         Log.d("PROFILE_DEBUG", "firstName: " + firstNameStr);
         Log.d("PROFILE_DEBUG", "bloodGroup: " + bloodGroupStr);

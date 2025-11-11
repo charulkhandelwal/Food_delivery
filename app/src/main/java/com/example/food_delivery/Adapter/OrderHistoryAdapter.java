@@ -59,19 +59,19 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
                         : "")
         );        b.tvPrice.setText("₹" + order.getFinalPrice());
 
-        // Status color & text
+
         String status= order.getStatus();
         b.tvStatus.setText(capitalize(status));
 
         switch (status.toLowerCase()) {
             case "delivered":
-                b.tvStatus.setTextColor(0xFF4CAF50); // Green
+                b.tvStatus.setTextColor(0xFF4CAF50);
                 break;
             case "cancelled":
-                b.tvStatus.setTextColor(0xFFF44336); // Red
+                b.tvStatus.setTextColor(0xFFF44336);
                 break;
             default:
-                b.tvStatus.setTextColor(0xFFFF9800); // Orange
+                b.tvStatus.setTextColor(0xFFFF9800);
                 break;
         }
 
@@ -89,7 +89,7 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
 
         b.tvDate.setText(formattedDate);
 
-        // Restaurant logo
+
         Glide.with(b.imgRestaurantLog.getContext())
                 .load(order.getRestaurantId().getRestaurantLogo())
                 .into(b.imgRestaurantLog);

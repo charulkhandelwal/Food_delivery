@@ -8,7 +8,7 @@ public class OrderHistoryResponse {
     private String message;
     private Results results;
 
-    // Getters and Setters
+
     public boolean isSuccess() {
         return success;
     }
@@ -33,23 +33,23 @@ public class OrderHistoryResponse {
         this.results = results;
     }
 
-    // ✅ Results Model (Handles both cases)
+
     public static class Results {
-        // For "No history found" case
+
         private List<Object> docs;
         private int totalDocs;
         private int limit;
         private int page;
         private int totalPages;
 
-        // For "History fetched successfully" case
+
         private int totalOrders;
         private int pageSize;
         private boolean hasNextPage;
         private boolean hasPrevPage;
         private List<OrderData> data;
 
-        // Getters and Setters
+
         public List<Object> getDocs() {
             return docs;
         }
@@ -131,7 +131,6 @@ public class OrderHistoryResponse {
         }
     }
 
-    // ✅ OrderData Model
     public static class OrderData {
         private String _id;
         private UserId userId;
@@ -142,7 +141,7 @@ public class OrderHistoryResponse {
         private String status;
         private String createdAt;
 
-        // Getters and Setters
+
         public String get_id() {
             return _id;
         }
@@ -208,7 +207,7 @@ public class OrderHistoryResponse {
         }
     }
 
-    // ✅ UserId Model
+
     public static class UserId {
         private String _id;
         private String firstName;
@@ -239,7 +238,6 @@ public class OrderHistoryResponse {
         }
     }
 
-    // ✅ RestaurantId Model
     public static class RestaurantId {
         private String _id;
         private String name;
@@ -279,7 +277,7 @@ public class OrderHistoryResponse {
         }
     }
 
-    // ✅ AddressId Model
+
     public static class AddressId {
         private String _id;
         private String addressType;
@@ -346,7 +344,7 @@ public class OrderHistoryResponse {
         }
     }
 
-    // ✅ Location Model
+
     public static class Location {
         private String type;
         private List<Double> coordinates;
