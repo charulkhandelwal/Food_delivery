@@ -23,7 +23,8 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:background="@android:color/white"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnOrders"
@@ -34,7 +35,8 @@
             android:background="@drawable/bottom_selected"
             android:textColor="@android:color/white"
             android:drawableTop="@drawable/beg"
-            android:gravity="center"/>
+            android:gravity="center"
+            />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnAccount"

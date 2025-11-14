@@ -1,6 +1,6 @@
 package com.example.food_delivery.fragment;
 
-import static androidx.graphics.shapes.Utils.distance;
+//import static androidx.graphics.shapes.Utils.distance;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -643,6 +643,9 @@ public class Order extends Fragment {
 
     private void loadActiveOrders() {
         if (isMapOpen) {
+            binding.shimmerLayout.setVisibility(View.VISIBLE);
+            binding.layoutMain.setVisibility(View.GONE);
+            binding.shimmerLayout.startShimmer();
             Log.d(TAG, "Map is open — skipping order reload");
             return;
         }
@@ -659,12 +662,19 @@ public class Order extends Fragment {
                     Log.w("OrderFragment", "⚠️ View destroyed, skipping onResponse UI update");
                     return;
                 }
+
+                binding.shimmerLayout.stopShimmer();
+                binding.shimmerLayout.setVisibility(View.GONE);
+                binding.layoutMain.setVisibility(View.VISIBLE);
+               // binding.swipeRefreshLayout.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
                     orderList.clear();
                     orderList.addAll(response.body().getResults());
                     if (orderList.isEmpty()) {
+
                         binding.layoutNoOrders.setVisibility(View.VISIBLE);
                         binding.layoutOrderList.setVisibility(View.GONE);
+
                     } else {
                         binding.layoutNoOrders.setVisibility(View.GONE);
                         binding.layoutOrderList.setVisibility(View.VISIBLE);
@@ -706,6 +716,9 @@ public class Order extends Fragment {
             @Override
             public void onFailure(Call<OrderModel> call, Throwable t) {
                 t.printStackTrace();
+                binding.shimmerLayout.stopShimmer();
+                binding.shimmerLayout.setVisibility(View.GONE);
+                binding.layoutMain.setVisibility(View.VISIBLE);
                 Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

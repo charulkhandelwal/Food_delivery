@@ -92,7 +92,7 @@ public class EditProfileActivity extends AppCompatActivity {
         binding.tvChangePhoto.setOnClickListener(v -> showImageSourceDialog());
         binding.etDob.setOnClickListener(v -> showDatePicker());
         binding.btnSave.setOnClickListener(v -> {
-            showShimmer(); // Show shimmer before API call
+            showShimmer();
             updateProfile();
         });
     }
