@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,8 @@ import com.example.food_delivery.Model.GetProfileResponse;
 import com.example.food_delivery.R;
 import com.example.food_delivery.SharedPrefrences.DocumentPrefs;
 import com.example.food_delivery.databinding.FragmentAccountBinding;
+import com.google.android.material.transition.platform.MaterialContainerTransform;
+import com.google.android.material.transition.platform.MaterialFadeThrough;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -51,40 +54,69 @@ public class Account extends Fragment {
         View view = binding.getRoot();
 
 
+        setEnterTransition(new MaterialFadeThrough());
+        setExitTransition(new MaterialFadeThrough());
+
         setupClicks();
-
-
         getProfileData();
 
         return view;
     }
 
     private void setupClicks() {
-      //  binding.icback1.setOnClickListener(v ->
-                //startActivity(new Intent(getActivity(), Refer_win.class)));
-        binding.backwallethistory.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), WalletHistory.class)));
 
+        View.OnClickListener animationClick = v -> {
+            v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(120)
+                    .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(120).start())
+                    .start();
+        };
 
-        binding.backAbout.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), AboutActivity.class)));
+        binding.editprofile.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), EditProfileActivity.class));
+            applyTransitionAnimation();
+        });
 
-        binding.backHelp.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), HelpSupportActivity.class)));
+        binding.backorderhistory.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), OrderHistoryAcitivity.class));
+            applyTransitionAnimation();
+        });
 
-        binding.backFaq.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), FAQ_Activity.class)));
+        binding.backcodsettelment.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), CodSettelment_Activity.class));
+            applyTransitionAnimation();
+        });
 
-        binding.editprofile.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), EditProfileActivity.class)));
+        binding.backwallethistory.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), WalletHistory.class));
+            applyTransitionAnimation();
+        });
 
-        binding.backorderhistory.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), OrderHistoryAcitivity.class)));
+        binding.backFaq.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), FAQ_Activity.class));
+            applyTransitionAnimation();
+        });
 
-        binding.backcodsettelment.setOnClickListener(v ->
-                startActivity(new Intent(getActivity(), CodSettelment_Activity.class)));
+        binding.backHelp.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), HelpSupportActivity.class));
+            applyTransitionAnimation();
+        });
 
-        binding.rowLogout.setOnClickListener(v -> showLogoutDialog());
+        binding.backAbout.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            startActivity(new Intent(getActivity(), AboutActivity.class));
+            applyTransitionAnimation();
+        });
+
+        binding.rowLogout.setOnClickListener(v -> {
+            animationClick.onClick(v);
+            showLogoutDialog();
+        });
     }
 
     private void getProfileData() {
@@ -141,6 +173,7 @@ public class Account extends Fragment {
             Glide.with(requireContext())
                     .load(imageUrl)
                     .placeholder(R.drawable.log)
+                    .circleCrop()
                     .into(binding.imgProfile);
         } else {
             binding.imgProfile.setImageResource(R.drawable.log);
@@ -150,7 +183,7 @@ public class Account extends Fragment {
     }
 
     private void showLogoutDialog() {
-        new android.app.AlertDialog.Builder(requireContext())
+        new android.app.AlertDialog.Builder(requireContext(), R.style.CustomAlertDialog)
                 .setTitle("Log Out")
                 .setMessage("Are you sure you want to log out?")
                 .setPositiveButton("Yes", (dialog, which) -> logoutUser())
@@ -180,6 +213,10 @@ public class Account extends Fragment {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         requireActivity().finish();
+    }
+
+    private void applyTransitionAnimation() {
+        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override

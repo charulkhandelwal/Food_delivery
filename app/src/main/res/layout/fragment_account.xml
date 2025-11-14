@@ -6,11 +6,13 @@
     <data>
     </data>
 
+
     <LinearLayout
         android:orientation="vertical"
         android:background="@android:color/white"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
 
         <LinearLayout
@@ -18,7 +20,8 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:background="@drawable/bg_gradient2">
 
 
             <com.google.android.material.imageview.ShapeableImageView

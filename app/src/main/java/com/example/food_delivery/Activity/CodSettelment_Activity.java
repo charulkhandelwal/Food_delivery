@@ -35,12 +35,12 @@ public class CodSettelment_Activity extends AppCompatActivity {
 
         initViews();
         setupRecycler();
-        loadDummyData(); // TODO: Replace with API data
+        loadDummyData();
         calculateSummary();
         setupPayButton();
     }
 
-    // ✅ Initialize all views
+
     private void initViews() {
         recyclerCodSettlement = findViewById(R.id.recyclerCodSettlement);
         tvTotalPayment = findViewById(R.id.tvTotalPayment);
@@ -50,7 +50,7 @@ public class CodSettelment_Activity extends AppCompatActivity {
         btnPay = findViewById(R.id.btnPay);
     }
 
-    // ✅ Setup RecyclerView
+
     private void setupRecycler() {
         recyclerCodSettlement.setLayoutManager(new LinearLayoutManager(this));
         codList = new ArrayList<>();
@@ -58,7 +58,7 @@ public class CodSettelment_Activity extends AppCompatActivity {
         recyclerCodSettlement.setAdapter(adapter);
     }
 
-    // ✅ Dummy Data (Replace with API Response)
+
     private void loadDummyData() {
         codList.add(new CodSettelmentModel(
                 "Pizza Hub", "12345", "COD", 500, 50,
@@ -86,7 +86,7 @@ public class CodSettelment_Activity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // ✅ Calculate Total, Commission & Final Amount
+
     private void calculateSummary() {
         double totalPayment = 0;
         double totalCommission = 0;
@@ -98,14 +98,14 @@ public class CodSettelment_Activity extends AppCompatActivity {
 
         double toPay = totalPayment - totalCommission;
 
-        // ✅ Set TextViews
+
         tvTotalPayment.setText("Total Payment: ₹" + totalPayment);
         tvCommission.setText("Commission: ₹" + totalCommission);
         tvToPayCalculation.setText("₹" + totalPayment + " - ₹" + totalCommission);
         tvFinalAmount.setText("Final Amount: ₹" + toPay);
     }
 
-    // ✅ Pay Button Action
+
     private void setupPayButton() {
         btnPay.setOnClickListener(v -> {
             Toast.makeText(this, "Payment of ₹" + tvFinalAmount.getText().toString().replace("Final Amount: ₹", "") + " Successful ✅", Toast.LENGTH_SHORT).show();

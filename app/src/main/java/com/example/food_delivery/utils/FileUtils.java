@@ -13,7 +13,7 @@ import java.util.Date;
 
 public class FileUtils {
 
-    // Convert content Uri -> Absolute file path (String)
+
     public static String getPath(Context context, Uri uri) {
         String result = null;
         String[] projection = { MediaStore.Images.Media.DATA };

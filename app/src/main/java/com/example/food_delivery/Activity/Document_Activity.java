@@ -122,7 +122,7 @@ public class Document_Activity extends AppCompatActivity {
                         finish();
                     } else {
                         Toast.makeText(Document_Activity.this, "Some documents are still pending or rejected.", Toast.LENGTH_SHORT).show();
-                        getDocumentsFromServer(); // Refresh UI
+                        getDocumentsFromServer();
                     }
 
                 } else {
