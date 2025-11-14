@@ -655,6 +655,10 @@ public class Order extends Fragment {
         call.enqueue(new Callback<OrderModel>() {
             @Override
             public void onResponse(Call<OrderModel> call, Response<OrderModel> response) {
+                if (getView() == null || binding == null) {
+                    Log.w("OrderFragment", "⚠️ View destroyed, skipping onResponse UI update");
+                    return;
+                }
                 if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
                     orderList.clear();
                     orderList.addAll(response.body().getResults());

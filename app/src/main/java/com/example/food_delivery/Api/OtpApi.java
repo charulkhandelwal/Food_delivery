@@ -14,9 +14,11 @@ import com.example.food_delivery.Model.PrivacyPolicyModelResponse;
 import com.example.food_delivery.Model.ProfileModel;
 import com.example.food_delivery.Model.WalletHistoryModelResponse;
 import com.example.food_delivery.Model.ReachedRestaurantModel;
+import com.example.food_delivery.Model.WalletSettleResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -88,12 +90,16 @@ public interface OtpApi {
 
     @GET("delivery-partner/orders/history")
     Call<OrderHistoryResponse> getHistory(@Header("Authorization") String bearerToekn);
+
     @GET("delivery-partner/privacy-policy")
     Call<PrivacyPolicyModelResponse> getPrivacy(@Header("Authorization") String bearerToken);
+
     @GET("delivery-partner/terms-and-conditions")
     Call<PrivacyPolicyModelResponse> getTerms(@Header("Authorization") String bearerToken);
+
     @GET("delivery-partner/faq")
     Call<GetFaqResponse> getFaq(@Header("Authorization") String bearerToken);
+
     @GET("delivery-partner/wallet-history")
     Call<WalletHistoryModelResponse> getWalletHistory(@Header("Authorization") String bearerToken);
 
@@ -133,5 +139,18 @@ public interface OtpApi {
             @Header("Authorization") String bearerToken,
             @Body Map<String, String> body
     );
+
+    @GET("delivery-partner/orders/settle-wallet")
+    Call<WalletSettleResponse> getCODSettlement(
+            @Header("Authorization") String bearerToken
+
+    );
+
+    @POST("delivery-partner/orders/settle-wallet")
+    Call<WalletSettleResponse> postCODSettlement(
+            @Header("Authorization") String bearerToken,
+            @Body Map<String, Object> body
+    );
+
 
 }

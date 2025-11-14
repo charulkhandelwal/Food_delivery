@@ -14,6 +14,17 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <!-- Restaurant Id -->
+        <TextView
+                android:id="@+id/tvRestaurantId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restaurant Id"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@color/black"/>
+
+
         <!-- Restaurant Name -->
         <TextView
             android:id="@+id/tvRestaurantName"
@@ -48,6 +59,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Payment Method: COD"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/tvTotalPayment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total payment- "
             android:textStyle="bold"
             android:layout_marginTop="8dp"
             android:textColor="@color/black"/>
